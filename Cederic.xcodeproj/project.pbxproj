@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4D72238D1B0E778600DB1B6D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D72238C1B0E778600DB1B6D /* main.swift */; };
+		4D7223941B0E77AC00DB1B6D /* Cederic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7223931B0E77AC00DB1B6D /* Cederic.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +26,7 @@
 /* Begin PBXFileReference section */
 		4D7223891B0E778600DB1B6D /* Cederic */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Cederic; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D72238C1B0E778600DB1B6D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		4D7223931B0E77AC00DB1B6D /* Cederic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cederic.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 			isa = PBXGroup;
 			children = (
 				4D72238C1B0E778600DB1B6D /* main.swift */,
+				4D7223931B0E77AC00DB1B6D /* Cederic.swift */,
 			);
 			path = Cederic;
 			sourceTree = "<group>";
@@ -119,6 +122,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D72238D1B0E778600DB1B6D /* main.swift in Sources */,
+				4D7223941B0E77AC00DB1B6D /* Cederic.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
