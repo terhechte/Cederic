@@ -45,14 +45,14 @@ enum SWKqueueFilter {
 }
 
 
-
+let identifierNr = 0x6c0176ef // a random number
 
 let k = kqueue()
 var ud: UnsafeMutablePointer<Int32> = nil
 
 let c = EV_ADD
 let f = 0
-var kev: kevent = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(c), fflags: UInt32(f), data: Int(0), udata: ud)
+var kev: kevent = kevent(ident: UInt(identifierNr), filter: Int16(EVFILT_USER), flags: UInt16(c), fflags: UInt32(f), data: Int(0), udata: ud)
 // Register
 kevent(k, &kev, 1, nil, 0, nil)
 
@@ -75,7 +75,7 @@ func swKqueuePostEvent(ctx: String) {
     let fx = NOTE_TRIGGER
     var udx: UnsafeMutablePointer<Int32> = UnsafeMutablePointer<Int32>.alloc(1)
     udx.memory = Int32(cxx)
-    var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: udx)
+    var ev = kevent(ident: UInt(identifierNr), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: udx)
     let er = kevent(k, &ev, 1, nil, 0, nil)
     if (er < 0) {
         println("could not post")
@@ -95,7 +95,7 @@ func swKqueuePostEvent(ctx: String) {
     let context = UnsafeMutablePointer<String>.alloc(1)
     context.initialize(ctx)
     
-    var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: context)
+    var ev = kevent(ident: UInt(identifierNr), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: context)
     let er = kevent(k, &ev, 1, nil, 0, nil)
     if (er < 0) {
         println("could not post")
@@ -145,7 +145,7 @@ while (true) {
         
         let cx = EV_DISABLE
         let fx = 0
-        var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: ud)
+        var ev = kevent(ident: UInt(identifierNr), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: ud)
         let er = kevent(k, &ev, 1, nil, 0, nil)
 //        println("cleaning", er)
         udx += 1
