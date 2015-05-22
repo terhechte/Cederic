@@ -50,6 +50,7 @@ You don't. Yet.
 
 ##### Swift
 * http://www.codingexplorer.com/structures-swift/
+* http://sketchytech.blogspot.de/2014/10/becoming-less-afraid-of-unsafe-mutable.html
 
 ##### Clojure Agents
 * http://clojure.org/agents
