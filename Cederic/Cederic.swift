@@ -11,8 +11,11 @@ import Dispatch
 
 /*
 TODO:
-- [ ] 12% CPU on Retina 13" (2012) with 500 agents. Also leaks memory
-- [ ] 10% CPU on Retina 13" (2012) with 5000 agents. No leaks. Much better.
+- [ ] 12% CPU on Retina 13" (2012) with 500 idle agents. Also leaks memory
+- [ ] 10% CPU on Retina 13" (2012) with 5000 idle agents. No leaks. Much better.
+- [ ] 0% CPU on Retina 13" (2012) with 50000 idle agents. No leaks.
+- [ ] 42% CPU on Retina 13" (2012) with 50000 agents and (around) 1000 data updates / send calls per second
+
 - [ ] make .value bindings compatible (willChangeValue..)
 - [ ] add lots and lots of tests
 - [ ] define operators for easy equailty
@@ -50,6 +53,9 @@ Notes:
 let kAmountOfPooledQueues = 4
 
 
+//----
+// Maybe name for kQueue library: kqueue... kjue as in queue. which is the pronounciation of Q (technical guy from james bond)
+//----
 
 
 /*!
@@ -66,7 +72,9 @@ class AgentQueueManager {
         }
         return p
     }()
-    var operations: [()->()] = []
+    var operations: [String: ()->()] = [:]
+    
+    typealias AgentQueueOPID = String
     
     init() {
         self.perform()
@@ -83,10 +91,12 @@ class AgentQueueManager {
         return agentQueuePool[pos]
     }
     
-    func add(op: ()->()) {
-        dispatch_async(self.agentProcessQueue , { () -> Void in
-                self.operations.append(op)
+    func add(op: ()->()) -> AgentQueueOPID {
+        let uuid = NSUUID().UUIDString
+        dispatch_barrier_async(self.agentConcurrentQueue , { () -> Void in
+            self.operations[uuid] = op
         })
+        return uuid
     }
     
     func perform() {
@@ -95,24 +105,37 @@ class AgentQueueManager {
             var evlist = UnsafeMutablePointer<kevent>.alloc(10)
             while (true) {
                 
-                println("waiting")
                 
                 let newEvent = kevent(k, nil, 0, evlist, 10, nil)
                 
                 if newEvent > 0 {
                     
-                    let uvx = evlist[0].udata
-//                    println("got events (\(evlist[0].data))", address(&evlist))
-                    let px = UnsafeMutablePointer<Int32>(uvx)
-                    println("ev: \(px.memory) c: \(newEvent)")
-                    if Int(px.memory) != Int(lstv) {
-                        println("missed a package! is: \(lstv) has: \(px.memory) eventcount: \(newEvent)")
-                    }
-                    lstv += 1
                     
-                    dispatch_sync(self.agentProcessQueue, { () -> Void in
-                        self.operations.map {op in op()}
-                    })
+                    for ix in 0..<newEvent {
+                        
+                        let uvx = evlist[Int(ix)].udata
+                        let px = UnsafeMutablePointer<String>(uvx)
+                        let sx = px.memory
+//                        println("receiving: \(lstv) has: \(px.memory) eventcount: \(newEvent)")
+                        
+                        //                    println("got events (\(evlist[0].data))", address(&evlist))
+//                        println("ev: \(px.memory) c: \(newEvent)")
+//                        if Int(px.memory) != Int(lstv) {
+//                            println("missed a package! is: \(lstv) has: \(px.memory) eventcount: \(newEvent)")
+//                        }
+//                        lstv += 1
+                        
+                        dispatch_async(self.agentConcurrentQueue, { () -> Void in
+                            // FIXME: UNSAFE!!
+                            if let op = self.operations[sx] {
+                                op()
+                            }
+                            px.destroy()
+                            px.dealloc(1)
+                            //                            self.operations.map {op in op()}
+                        })
+                    }
+                    
                     
                     let cx = EV_DISABLE
                     let fx = 0
@@ -154,7 +177,7 @@ public class Agent<T> {
     private var watches:[AgentWatch]
     private var actions: [(AgentSendType, AgentAction)]
     private var stop = false
-    //private var opidx = 0
+    private var opidx: AgentQueueManager.AgentQueueOPID?
     
     init(initialState: T, validator: AgentValidator?) {
         
@@ -162,19 +185,21 @@ public class Agent<T> {
         self.validator = validator
         self.watches = []
         self.actions = []
-        queueManager.add(self.process)
+        self.opidx = queueManager.add(self.process)
     }
     
     func send(fn: AgentAction) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.actions.append((AgentSendType.Pooled, fn))
-            swKqueuePostEvent()
+            self.opidx.map {i in swKqueuePostEvent(i)}
+            //swKqueuePostEvent(self.opidx)
         })
     }
     func sendOff(fn: AgentAction) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.actions.append((AgentSendType.Solo, fn))
-            swKqueuePostEvent()
+            self.opidx.map {i in swKqueuePostEvent(i)}
+            //swKqueuePostEvent(self.opidx)
         })
     }
     func addWatch(watch: AgentWatch) {
@@ -199,28 +224,32 @@ public class Agent<T> {
     }
     
     func process() {
-            var fn: (AgentSendType, AgentAction)?
-            
+        var fn: (AgentSendType, AgentAction)?
+        
+        // FIXME: Loop over actions here? To process everything we have?
+        
+        if self.actions.count > 0 {
             dispatch_sync(queueManager.agentBlockQueue, { () -> Void in
-                if self.actions.count > 0 {
-                    fn = self.actions.removeAtIndex(0)
-                }
+                fn = self.actions.removeAtIndex(0)
             })
-            
-            switch fn {
-            case .Some(.Pooled, let f):
-                dispatch_async(queueManager.anyPoolQueue, { () -> Void in
-                    self.calculate(f)
-                })
-            case .Some(.Solo, let f):
-                // Create and destroy a queue just for this
-                let uuid = NSUUID().UUIDString
-                let ourQueue = dispatch_queue_create(uuid, nil)
-                dispatch_async(ourQueue, { () -> Void in
-                    self.calculate(f)
-                })
-            default: ()
-            }
+        } else {
+            return;
+        }
+        
+        switch fn {
+        case .Some(.Pooled, let f):
+            dispatch_async(queueManager.anyPoolQueue, { () -> Void in
+                self.calculate(f)
+            })
+        case .Some(.Solo, let f):
+            // Create and destroy a queue just for this
+            let uuid = NSUUID().UUIDString
+            let ourQueue = dispatch_queue_create(uuid, nil)
+            dispatch_async(ourQueue, { () -> Void in
+                self.calculate(f)
+            })
+        default: ()
+        }
     }
 }
 

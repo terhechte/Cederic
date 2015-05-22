@@ -79,30 +79,51 @@ kevent(k, &kev, 1, nil, 0, nil)
 - [ ] type safety by using proper swift enums?
 */
 
-var cxx = 0
-func swKqueuePostEvent() {
+//var cxx = 0
+func swKqueuePostEvent(ctx: String) {
+    /*
     let cx = EV_ENABLE
     let fx = NOTE_TRIGGER
     var udx: UnsafeMutablePointer<Int32> = UnsafeMutablePointer<Int32>.alloc(1)
-    println("sending: \(cxx)")
     udx.memory = Int32(cxx)
     var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: udx)
     let er = kevent(k, &ev, 1, nil, 0, nil)
+    if (er < 0) {
+        println("could not post")
+    }
     cxx += 1
+*/
+    
+    // TODO: Does ctx need to be inout, to make sure it is not deallocated along the way?
+    let cx = EV_ENABLE
+    let fx = NOTE_TRIGGER
+    
+//    var udx: UnsafeMutablePointer<Int8> = nil
+//    if let s = ctx.cStringUsingEncoding(NSASCIIStringEncoding) {
+//        let len = Int(strlen(s) + 1)
+//        udx = strcpy(UnsafeMutablePointer<Int8>.alloc(len), s)
+//    }
+    let context = UnsafeMutablePointer<String>.alloc(1)
+    context.initialize(ctx)
+    
+    var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: context)
+    let er = kevent(k, &ev, 1, nil, 0, nil)
+    if (er < 0) {
+        println("could not post")
+    }
 }
 
+// --- start here
 
-//let t = dispatch_time(DISPATCH_TIME_NOW, Int64(NSEC_PER_SEC * 2))
-//dispatch_after(t, dispatch_get_global_queue(0, 0)) { () -> Void in
-//    while (true) {
-//        swKqueuePostEvent()
-//        swKqueuePostEvent()
-//        swKqueuePostEvent()
-//        swKqueuePostEvent()
-//        //println("posting", er)
-//        sleep(3)
-//    }
-//}
+/*
+dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), { () -> Void in
+    sleep(2)
+    while (true) {
+        usleep(10000)
+        swKqueuePostEvent()
+    }
+})
+
 
 // Events that were triggered
 var evlist = UnsafeMutablePointer<kevent>.alloc(10)
@@ -111,44 +132,56 @@ func address(o: UnsafePointer<Void>) -> Int {
     return unsafeBitCast(o, Int.self)
 }
 
-//while (true) {
-//    println("Waiting for event")
-//    var ev: UnsafeMutablePointer<kevent> = nil
-//    
-//    let newEvent = kevent(k, nil, 0, evlist, 10, nil)
-//    
+var udx:Int32 = 0
+while (true) {
+    println("Waiting for event")
+    var ev: UnsafeMutablePointer<kevent> = nil
+    
+    let newEvent = kevent(k, nil, 0, evlist, 10, nil)
+    
 //    println("newevent", newEvent)
-//    
-//    if newEvent > 0 {
-//        
-//        let uvx = evlist[0].udata
-//        println("got events (\(evlist[0].data))", address(&evlist))
-//        let px = UnsafeMutablePointer<Int32>(uvx)
-//        println(px.memory)
-//        
-//        let cx = EV_DISABLE
-//        let fx = 0
-//        var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: ud)
-//        let er = kevent(k, &ev, 1, nil, 0, nil)
+    
+    if newEvent > 0 {
+        
+        let uvx = evlist[0].udata
+        println("got events (\(evlist[0].data))", address(&evlist))
+        let px = UnsafeMutablePointer<Int32>(uvx)
+        let i = px.memory
+        //println(px.memory)
+        println("got \(i) is \(udx)")
+        if i != udx {
+            println("argh")
+        }
+        usleep(UInt32(arc4random_uniform(10000)))
+        
+        let cx = EV_DISABLE
+        let fx = 0
+        var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: ud)
+        let er = kevent(k, &ev, 1, nil, 0, nil)
 //        println("cleaning", er)
-//    }
-//
-//}
+        udx += 1
+    }
+
+}
+
+*/
+// -- end here
 
 // Small test of send and running lots of agents
 var a1 = Agent(initialState: 5, validator: {n in return n < 100})
 print(a1.value)
 a1.send({n in return n + 10})
 print(a1.value)
+let maxagents = 50000
 var agents: [Agent<Int>] = []
-for i in 1...5000 {
+for i in 1...maxagents {
     agents.append(Agent(initialState: 5, validator: {n in return n < 100}))
 }
 
 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), { () -> Void in
     while (true) {
-        usleep(10000)
-        let pos = Int(arc4random_uniform(UInt32(5000)))
+        usleep(1000)
+        let pos = Int(arc4random_uniform(UInt32(maxagents)))
         agents[pos].send({n in return n + 1})
     }
 })
@@ -157,9 +190,9 @@ var s = 0
 while(true) {
     sleep(1)
     var c = 0
-    for ag in agents {
-        c += (ag.value - 5)
-    }
+//    for ag in agents {
+//        c += (ag.value - 5)
+//    }
     println("after \(s) seconds \(c) iterations")
     s += 1
 }
