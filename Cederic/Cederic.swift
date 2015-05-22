@@ -11,7 +11,8 @@ import Dispatch
 
 /*
 TODO:
-- [ ] 12% CPU on Retina 13" (2012). Also leaks memory
+- [ ] 12% CPU on Retina 13" (2012) with 500 agents. Also leaks memory
+- [ ] 10% CPU on Retina 13" (2012) with 5000 agents. No leaks. Much better.
 - [ ] make .value bindings compatible (willChangeValue..)
 - [ ] add lots and lots of tests
 - [ ] define operators for easy equailty
@@ -26,6 +27,7 @@ Most of the clojure stuff:
 - [ ] The watch fn must be a fn of 4 args: a key, the reference, its old-state, its new-state.
 - [ ] error handling (see https://github.com/clojure/clojure/blob/028af0e0b271aa558ea44780e5d951f4932c7842/src/clj/clojure/core.clj#L2002
 - [ ] restarting
+- [ ] update the code to use barriers
 
 Try removing the usleep by one of those means:
 - kqueue: http://www.freebsd.org/cgi/man.cgi?query=kqueue&sektion=2
@@ -61,6 +63,12 @@ class AgentQueueManager {
         }
         return p
     }()
+    var operations: [()->()] = []
+    
+    init() {
+        self.perform()
+    }
+    
     /* // compiler doesn't like this. should file a radar
     lazy var agentQueuePool: [dispatch_queue_t] = { ()->[dispatch_queue_t] in
         return 0...4.map { (n: Int)->dispatch_queue_t in
@@ -70,6 +78,25 @@ class AgentQueueManager {
     var anyPoolQueue: dispatch_queue_t {
         let pos = Int(arc4random_uniform(UInt32(kAmountOfPooledQueues) + UInt32(1)))
         return agentQueuePool[pos]
+    }
+    
+    func add(op: ()->()) {
+        dispatch_async(self.agentProcessQueue , { () -> Void in
+                self.operations.append(op)
+        })
+    }
+    
+    func perform() {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
+            while (true) {
+                dispatch_sync(self.agentProcessQueue, { () -> Void in
+                    self.operations.map {op in op()}
+                })
+                
+                let milliseconds:useconds_t  = 10
+                usleep(milliseconds * 1000)
+            }
+        })
     }
 }
 
@@ -107,12 +134,10 @@ public class Agent<T> {
         self.validator = validator
         self.watches = []
         self.actions = []
-        self.process()
+        queueManager.add(self.process)
     }
     
     func send(fn: AgentAction) {
-        // add the fn to a queue
-        // as the funcQueue is serial, this will never lead to a race condition
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.actions.append((AgentSendType.Pooled, fn))
         })
@@ -144,38 +169,28 @@ public class Agent<T> {
     }
     
     func process() {
-        dispatch_async(queueManager.agentProcessQueue, { () -> Void in
-            while (!self.stop) {
-               
-                dispatch_async(queueManager.agentConcurrentQueue, { () -> Void in
-                    var fn: (AgentSendType, AgentAction)?
-                    
-                    dispatch_sync(queueManager.agentBlockQueue, { () -> Void in
-                        if self.actions.count > 0 {
-                            fn = self.actions.removeAtIndex(0)
-                        }
-                    })
-                    
-                    switch fn {
-                    case .Some(.Pooled, let f):
-                        dispatch_async(queueManager.anyPoolQueue, { () -> Void in
-                            self.calculate(f)
-                        })
-                    case .Some(.Solo, let f):
-                        // Create and destroy a queue just for this
-                        let uuid = NSUUID().UUIDString
-                        let ourQueue = dispatch_queue_create(uuid, nil)
-                        dispatch_async(ourQueue, { () -> Void in
-                            self.calculate(f)
-                        })
-                    default: ()
-                    }
+            var fn: (AgentSendType, AgentAction)?
+            
+            dispatch_sync(queueManager.agentBlockQueue, { () -> Void in
+                if self.actions.count > 0 {
+                    fn = self.actions.removeAtIndex(0)
+                }
+            })
+            
+            switch fn {
+            case .Some(.Pooled, let f):
+                dispatch_async(queueManager.anyPoolQueue, { () -> Void in
+                    self.calculate(f)
                 })
-                
-                let milliseconds:useconds_t  = 10
-                usleep(milliseconds * 1000)
+            case .Some(.Solo, let f):
+                // Create and destroy a queue just for this
+                let uuid = NSUUID().UUIDString
+                let ourQueue = dispatch_queue_create(uuid, nil)
+                dispatch_async(ourQueue, { () -> Void in
+                    self.calculate(f)
+                })
+            default: ()
             }
-        })
     }
 }
 
