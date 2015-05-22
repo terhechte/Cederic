@@ -9,26 +9,13 @@
 import Foundation
 import Dispatch
 
-
-// Agent
-
 /*
-
-; Agents provide shared access to mutable state. They allow non-blocking (asynchronous as opposed to synchronous atoms) and independent change of individual locations (unlike coordinated change of multiple locations through refs).
-
-;
-
-agents are submitted functions which are stored in a mailbox and then executed in order.
-
-The agent itself has state, but no logic.
-
-(def x (agent 0))
-(defn increment [c n] (+ c n))
-(send x increment 5)  ; @x -> 5
-(send x increment 10) ; @x -> 15
-Using a Clojure agent is more akin to operating on a data-structure than interacting with a service
-
 TODO:
+- [ ] 12% CPU on Retina 13" (2012). Also leaks memory
+- [ ] make .value bindings compatible (willChangeValue..)
+- [ ] add lots and lots of tests
+- [ ] define operators for easy equailty
+- [ ] find a better way to process the blocks than usleep (select?)
 - [ ] this is an undocumented mess. make it useful
 - [ ] solo and blocking actions
 - [ ] move most methods out of the class so that they're more functional and can be curried etc (i.e. send(agent, clojure)
@@ -38,12 +25,19 @@ Most of the clojure stuff:
 - [ ] error handling (see https://github.com/clojure/clojure/blob/028af0e0b271aa558ea44780e5d951f4932c7842/src/clj/clojure/core.clj#L2002
 - [ ] restarting
 
-*/
+Try removing the usleep by one of those means:
+- kqueue: http://www.freebsd.org/cgi/man.cgi?query=kqueue&sektion=2
+EVFILT_USER    Establishes	a user event identified	by ident which is not
+associated with any	kernel mechanism but is	triggered by
+user level code.  The lower	24 bits	of the fflags may be
+used for user defined flags	and manipulated	using the fol-
+lowing:
+A user event is triggered for output with the following:
+NOTE_TRIGGER       Cause the event to be triggered.
 
-// all Agents are placed on this queue
-//var kAgentProcessQueue: dispatch_queue_t
-//var kAgentBlockQueue: dispatch_queue_t
-//var kAgentQueuePool: [dispatch_queue_t]
+- dispatch_group/barrier: http://www.objc.io/issue-2/low-level-concurrency-apis.html
+
+*/
 
 let kAmountOfPooledQueues = 4
 
@@ -51,12 +45,13 @@ let kAmountOfPooledQueues = 4
 @abstract lazy vars can only exist in a struc or class or enum right now so we've to wrap it
 */
 class AgentQueueManager {
-    lazy var agentProcessQueue = dispatch_queue_create("agentProcessQueue", DISPATCH_QUEUE_SERIAL)
-    lazy var agentBlockQueue = dispatch_queue_create("agentBlockQueue", DISPATCH_QUEUE_SERIAL)
+    lazy var agentConcurrentQueue = dispatch_queue_create("com.stylemac.agentConcurrentQueue", DISPATCH_QUEUE_CONCURRENT)
+    lazy var agentProcessQueue = dispatch_queue_create("com.stylemac.agentProcessQueue", DISPATCH_QUEUE_SERIAL)
+    lazy var agentBlockQueue = dispatch_queue_create("com.stylemac.agentBlockQueue", DISPATCH_QUEUE_SERIAL)
     lazy var agentQueuePool: [dispatch_queue_t] = {
         var p: [dispatch_queue_t] = []
         for i in 0...kAmountOfPooledQueues {
-            p.append(dispatch_queue_create("AgentPoolQueue-\(i)", DISPATCH_QUEUE_SERIAL))
+            p.append(dispatch_queue_create("com.stylemac.AgentPoolQueue-\(i)", DISPATCH_QUEUE_SERIAL))
         }
         return p
     }()
@@ -125,9 +120,6 @@ public class Agent<T> {
     func destroy() {
         self.stop = true
     }
-    func deref() -> T {
-        return state
-    }
     func calculate(f: AgentAction) {
         let newValue = f(self.state)
         if let v = self.validator {
@@ -143,34 +135,34 @@ public class Agent<T> {
         }
     }
     func process() {
-        // this fn is being run on a concurrent queue
-        // and will continously process the fn's from the
-        // fn queue
+        // TODO: Instead of sleep, could do dispatch_after and at the end call process again
         dispatch_async(queueManager.agentProcessQueue, { () -> Void in
             while (!self.stop) {
-                
-                var fn: (AgentSendType, AgentAction)?
-                
-                dispatch_sync(queueManager.agentBlockQueue, { () -> Void in
-                    if self.actions.count > 0 {
-                        fn = self.actions.removeAtIndex(0)
+               
+                dispatch_async(queueManager.agentConcurrentQueue, { () -> Void in
+                    var fn: (AgentSendType, AgentAction)?
+                    
+                    dispatch_sync(queueManager.agentBlockQueue, { () -> Void in
+                        if self.actions.count > 0 {
+                            fn = self.actions.removeAtIndex(0)
+                        }
+                    })
+                    
+                    switch fn {
+                    case .Some(.Pooled, let f):
+                        dispatch_async(queueManager.anyPoolQueue, { () -> Void in
+                            self.calculate(f)
+                        })
+                    case .Some(.Solo, let f):
+                        // Create and destroy a queue just for this
+                        let uuid = NSUUID().UUIDString
+                        let ourQueue = dispatch_queue_create(uuid, nil)
+                        dispatch_async(ourQueue, { () -> Void in
+                            self.calculate(f)
+                        })
+                    default: ()
                     }
                 })
-                
-                switch fn {
-                case .Some(.Pooled, let f):
-                    dispatch_async(queueManager.anyPoolQueue, { () -> Void in
-                        self.calculate(f)
-                    })
-                case .Some(.Solo, let f):
-                    // Create and destroy a queue just for this
-                    let uuid = NSUUID().UUIDString
-                    let ourQueue = dispatch_queue_create(uuid, nil)
-                    dispatch_async(ourQueue, { () -> Void in
-                        self.calculate(f)
-                    })
-                default: ()
-                }
                 
                 usleep(1000)
             }

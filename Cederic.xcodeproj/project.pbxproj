@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		4D72238D1B0E778600DB1B6D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D72238C1B0E778600DB1B6D /* main.swift */; };
 		4D7223941B0E77AC00DB1B6D /* Cederic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7223931B0E77AC00DB1B6D /* Cederic.swift */; };
+		4D7223961B0E782200DB1B6D /* Readme.md in Sources */ = {isa = PBXBuildFile; fileRef = 4D7223951B0E782200DB1B6D /* Readme.md */; };
+		4D7223A01B0F09CD00DB1B6D /* CedericTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D72239F1B0F09CD00DB1B6D /* CedericTests.swift */; };
+		4D7223A41B0F09D600DB1B6D /* Cederic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7223931B0E77AC00DB1B6D /* Cederic.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,10 +30,21 @@
 		4D7223891B0E778600DB1B6D /* Cederic */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Cederic; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D72238C1B0E778600DB1B6D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		4D7223931B0E77AC00DB1B6D /* Cederic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cederic.swift; sourceTree = "<group>"; };
+		4D7223951B0E782200DB1B6D /* Readme.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Readme.md; sourceTree = SOURCE_ROOT; };
+		4D72239B1B0F09CD00DB1B6D /* CedericTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CedericTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4D72239E1B0F09CD00DB1B6D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4D72239F1B0F09CD00DB1B6D /* CedericTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CedericTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		4D7223861B0E778600DB1B6D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4D7223981B0F09CD00DB1B6D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -44,6 +58,7 @@
 			isa = PBXGroup;
 			children = (
 				4D72238B1B0E778600DB1B6D /* Cederic */,
+				4D72239C1B0F09CD00DB1B6D /* CedericTests */,
 				4D72238A1B0E778600DB1B6D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,6 +67,7 @@
 			isa = PBXGroup;
 			children = (
 				4D7223891B0E778600DB1B6D /* Cederic */,
+				4D72239B1B0F09CD00DB1B6D /* CedericTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,8 +77,26 @@
 			children = (
 				4D72238C1B0E778600DB1B6D /* main.swift */,
 				4D7223931B0E77AC00DB1B6D /* Cederic.swift */,
+				4D7223951B0E782200DB1B6D /* Readme.md */,
 			);
 			path = Cederic;
+			sourceTree = "<group>";
+		};
+		4D72239C1B0F09CD00DB1B6D /* CedericTests */ = {
+			isa = PBXGroup;
+			children = (
+				4D72239F1B0F09CD00DB1B6D /* CedericTests.swift */,
+				4D72239D1B0F09CD00DB1B6D /* Supporting Files */,
+			);
+			path = CedericTests;
+			sourceTree = "<group>";
+		};
+		4D72239D1B0F09CD00DB1B6D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				4D72239E1B0F09CD00DB1B6D /* Info.plist */,
+			);
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -85,6 +119,23 @@
 			productReference = 4D7223891B0E778600DB1B6D /* Cederic */;
 			productType = "com.apple.product-type.tool";
 		};
+		4D72239A1B0F09CD00DB1B6D /* CedericTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4D7223A11B0F09CD00DB1B6D /* Build configuration list for PBXNativeTarget "CedericTests" */;
+			buildPhases = (
+				4D7223971B0F09CD00DB1B6D /* Sources */,
+				4D7223981B0F09CD00DB1B6D /* Frameworks */,
+				4D7223991B0F09CD00DB1B6D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CedericTests;
+			productName = CedericTests;
+			productReference = 4D72239B1B0F09CD00DB1B6D /* CedericTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -95,6 +146,9 @@
 				ORGANIZATIONNAME = "Benedikt Terhechte";
 				TargetAttributes = {
 					4D7223881B0E778600DB1B6D = {
+						CreatedOnToolsVersion = 6.3.1;
+					};
+					4D72239A1B0F09CD00DB1B6D = {
 						CreatedOnToolsVersion = 6.3.1;
 					};
 				};
@@ -112,9 +166,20 @@
 			projectRoot = "";
 			targets = (
 				4D7223881B0E778600DB1B6D /* Cederic */,
+				4D72239A1B0F09CD00DB1B6D /* CedericTests */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4D7223991B0F09CD00DB1B6D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4D7223851B0E778600DB1B6D /* Sources */ = {
@@ -123,6 +188,16 @@
 			files = (
 				4D72238D1B0E778600DB1B6D /* main.swift in Sources */,
 				4D7223941B0E77AC00DB1B6D /* Cederic.swift in Sources */,
+				4D7223961B0E782200DB1B6D /* Readme.md in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4D7223971B0F09CD00DB1B6D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D7223A01B0F09CD00DB1B6D /* CedericTests.swift in Sources */,
+				4D7223A41B0F09D600DB1B6D /* Cederic.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,6 +296,38 @@
 			};
 			name = Release;
 		};
+		4D7223A21B0F09CD00DB1B6D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = CedericTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		4D7223A31B0F09CD00DB1B6D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = CedericTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -238,6 +345,14 @@
 			buildConfigurations = (
 				4D7223911B0E778600DB1B6D /* Debug */,
 				4D7223921B0E778600DB1B6D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		4D7223A11B0F09CD00DB1B6D /* Build configuration list for PBXNativeTarget "CedericTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4D7223A21B0F09CD00DB1B6D /* Debug */,
+				4D7223A31B0F09CD00DB1B6D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 		};
