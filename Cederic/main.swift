@@ -10,6 +10,41 @@ import Foundation
 
 // Timing tests
 
+struct SWKqueueQueue {
+    let queue: Int32
+    let name: String
+    
+    init(name: String) {
+        self.queue = kqueue()
+        self.name = name
+    }
+    func destroy() {
+        close(self.queue)
+        
+    }
+}
+
+enum SWKqueueFilterFlags {
+    enum VNodeFlags {
+        case Delete
+        case Write
+        case Extended
+        case Attrib
+        case Link
+        case Rename
+        case Revoke
+    }
+}
+
+enum SWKqueueFilter {
+    case UserEvent(identifier: UInt, flags: UInt32)
+    case ReadFD(fd: UInt, flags: UInt32)
+    case WriteFD(fd: UInt, flags: UInt32)
+    case VnodeFD(fd: UInt, flags: UInt32)
+    // FIXME: add the others
+}
+
+
 
 
 let k = kqueue()
@@ -44,28 +79,30 @@ kevent(k, &kev, 1, nil, 0, nil)
 - [ ] type safety by using proper swift enums?
 */
 
-
+var cxx = 0
 func swKqueuePostEvent() {
     let cx = EV_ENABLE
     let fx = NOTE_TRIGGER
     var udx: UnsafeMutablePointer<Int32> = UnsafeMutablePointer<Int32>.alloc(1)
-    udx.memory = Int32(158)
+    println("sending: \(cxx)")
+    udx.memory = Int32(cxx)
     var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: udx)
     let er = kevent(k, &ev, 1, nil, 0, nil)
+    cxx += 1
 }
 
 
-let t = dispatch_time(DISPATCH_TIME_NOW, Int64(NSEC_PER_SEC * 2))
-dispatch_after(t, dispatch_get_global_queue(0, 0)) { () -> Void in
-    while (true) {
-        swKqueuePostEvent()
-        swKqueuePostEvent()
-        swKqueuePostEvent()
-        swKqueuePostEvent()
-        //println("posting", er)
-        sleep(3)
-    }
-}
+//let t = dispatch_time(DISPATCH_TIME_NOW, Int64(NSEC_PER_SEC * 2))
+//dispatch_after(t, dispatch_get_global_queue(0, 0)) { () -> Void in
+//    while (true) {
+//        swKqueuePostEvent()
+//        swKqueuePostEvent()
+//        swKqueuePostEvent()
+//        swKqueuePostEvent()
+//        //println("posting", er)
+//        sleep(3)
+//    }
+//}
 
 // Events that were triggered
 var evlist = UnsafeMutablePointer<kevent>.alloc(10)
@@ -74,31 +111,30 @@ func address(o: UnsafePointer<Void>) -> Int {
     return unsafeBitCast(o, Int.self)
 }
 
-while (true) {
-    println("Waiting for event")
-    var ev: UnsafeMutablePointer<kevent> = nil
-    
-    let newEvent = kevent(k, nil, 0, evlist, 10, nil)
-    
-    println("newevent", newEvent)
-    
-    if newEvent > 0 {
-        
-        let uvx = evlist[0].udata
-        println("got events (\(evlist[0].data))", address(&evlist))
-        let px = UnsafeMutablePointer<Int32>(uvx)
-        println(px.memory)
-        
-        let cx = EV_DISABLE
-        let fx = 0
-        var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: ud)
-        let er = kevent(k, &ev, 1, nil, 0, nil)
-        println("cleaning", er)
-    }
+//while (true) {
+//    println("Waiting for event")
+//    var ev: UnsafeMutablePointer<kevent> = nil
+//    
+//    let newEvent = kevent(k, nil, 0, evlist, 10, nil)
+//    
+//    println("newevent", newEvent)
+//    
+//    if newEvent > 0 {
+//        
+//        let uvx = evlist[0].udata
+//        println("got events (\(evlist[0].data))", address(&evlist))
+//        let px = UnsafeMutablePointer<Int32>(uvx)
+//        println(px.memory)
+//        
+//        let cx = EV_DISABLE
+//        let fx = 0
+//        var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: ud)
+//        let er = kevent(k, &ev, 1, nil, 0, nil)
+//        println("cleaning", er)
+//    }
+//
+//}
 
-}
-
-/*
 // Small test of send and running lots of agents
 var a1 = Agent(initialState: 5, validator: {n in return n < 100})
 print(a1.value)
@@ -109,10 +145,21 @@ for i in 1...5000 {
     agents.append(Agent(initialState: 5, validator: {n in return n < 100}))
 }
 
+dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), { () -> Void in
+    while (true) {
+        usleep(10000)
+        let pos = Int(arc4random_uniform(UInt32(5000)))
+        agents[pos].send({n in return n + 1})
+    }
+})
+
+var s = 0
 while(true) {
     sleep(1)
-    print("sleep")
-    print(a1.value)
+    var c = 0
+    for ag in agents {
+        c += (ag.value - 5)
+    }
+    println("after \(s) seconds \(c) iterations")
+    s += 1
 }
-
-*/

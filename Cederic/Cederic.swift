@@ -49,6 +49,9 @@ Notes:
 
 let kAmountOfPooledQueues = 4
 
+
+
+
 /*!
 @abstract lazy vars can only exist in a struc or class or enum right now so we've to wrap it
 */
@@ -88,13 +91,37 @@ class AgentQueueManager {
     
     func perform() {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
+            var lstv = 0
+            var evlist = UnsafeMutablePointer<kevent>.alloc(10)
             while (true) {
-                dispatch_sync(self.agentProcessQueue, { () -> Void in
-                    self.operations.map {op in op()}
-                })
                 
-                let milliseconds:useconds_t  = 10
-                usleep(milliseconds * 1000)
+                println("waiting")
+                
+                let newEvent = kevent(k, nil, 0, evlist, 10, nil)
+                
+                if newEvent > 0 {
+                    
+                    let uvx = evlist[0].udata
+//                    println("got events (\(evlist[0].data))", address(&evlist))
+                    let px = UnsafeMutablePointer<Int32>(uvx)
+                    println("ev: \(px.memory) c: \(newEvent)")
+                    if Int(px.memory) != Int(lstv) {
+                        println("missed a package! is: \(lstv) has: \(px.memory) eventcount: \(newEvent)")
+                    }
+                    lstv += 1
+                    
+                    dispatch_sync(self.agentProcessQueue, { () -> Void in
+                        self.operations.map {op in op()}
+                    })
+                    
+                    let cx = EV_DISABLE
+                    let fx = 0
+                    var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: ud)
+                    let er = kevent(k, &ev, 1, nil, 0, nil)
+                }
+                
+//                let milliseconds:useconds_t  = 10
+//                usleep(milliseconds * 1000)
             }
         })
     }
@@ -127,6 +154,7 @@ public class Agent<T> {
     private var watches:[AgentWatch]
     private var actions: [(AgentSendType, AgentAction)]
     private var stop = false
+    //private var opidx = 0
     
     init(initialState: T, validator: AgentValidator?) {
         
@@ -140,11 +168,13 @@ public class Agent<T> {
     func send(fn: AgentAction) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.actions.append((AgentSendType.Pooled, fn))
+            swKqueuePostEvent()
         })
     }
     func sendOff(fn: AgentAction) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.actions.append((AgentSendType.Solo, fn))
+            swKqueuePostEvent()
         })
     }
     func addWatch(watch: AgentWatch) {
