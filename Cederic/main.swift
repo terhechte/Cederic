@@ -61,17 +61,6 @@ kevent(k, &kev, 1, nil, 0, nil)
 //chlist[0] = kev
 
 // Docs
-// http://www.opensource.apple.com/source/xnu/xnu-1456.1.26/tools/tests/xnu_quick_test/kqueue_tests.c
-// https://stuff.mit.edu/afs/sipb/project/freebsd/head/tools/regression/kqueue/user.c
-// http://stackoverflow.com/questions/16072395/using-kqueue-for-evfilt-user
-// http://wanproxy.org/svn/trunk/event/event_poll_kqueue.cc
-// http://julipedia.meroh.net/2004/10/example-of-kqueue.html
-// https://www.freebsd.org/cgi/man.cgi?query=kqueue
-// http://dev.eltima.com/post/93497713759/interacting-with-c-pointers-in-swift-part-2
-// http://www.sitepoint.com/using-legacy-c-apis-swift/
-// http://stackoverflow.com/questions/24058906/printing-a-variable-memory-address-in-swift
-// https://code.openhub.net/file?fid=NoLWjNE3u4rGljKdSnTH06aaCdY&cid=A2IwCo_X-fA&s=%22%23define%20EV_SET%22&fp=133476&mp,=1&ml=1&me=1&md=1&projSelected=true#L0
-// http://stackoverflow.com/questions/24146488/swift-pass-uninitialized-c-structure-to-imported-c-function
 
 /* TODO
 - [ ] Proper C Error handling, lots of unsafes around

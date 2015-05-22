@@ -19,9 +19,9 @@ TODO:
 - [ ] make .value bindings compatible (willChangeValue..)
 - [ ] add lots and lots of tests
 - [ ] define operators for easy equailty
-- [ ] find a better way to process the blocks than usleep (select?)
+- [x] find a better way to process the blocks than usleep (select?)
 - [ ] this is an undocumented mess. make it useful
-- [ ] solo and blocking actions
+- [x] solo and blocking actions
 - [ ] move most methods out of the class so that they're more functional and can be curried etc (i.e. send(agent, clojure)
 - [ ] make the kMaountOfPooledQueues dependent upon the cores in a machine
 - [ ] don't just randomly select a queue in the AgentQueueManager, but the queue with the least amount of operations, or at least the longest-non-added one. (could use atomic operations to store this)
@@ -30,7 +30,7 @@ Most of the clojure stuff:
 - [ ] The watch fn must be a fn of 4 args: a key, the reference, its old-state, its new-state.
 - [ ] error handling (see https://github.com/clojure/clojure/blob/028af0e0b271aa558ea44780e5d951f4932c7842/src/clj/clojure/core.clj#L2002
 - [ ] restarting
-- [ ] update the code to use barriers
+- [x] update the code to use barriers
 
 Try removing the usleep by one of those means:
 - kqueue: http://www.freebsd.org/cgi/man.cgi?query=kqueue&sektion=2
@@ -42,7 +42,7 @@ lowing:
 A user event is triggered for output with the following:
 NOTE_TRIGGER       Cause the event to be triggered.
 
-- dispatch_group/barrier: http://www.objc.io/issue-2/low-level-concurrency-apis.html
+- dispatch_group/barrier: 
 
 Notes:
 - Tried to use dispatch_after instead of usleep, as I expected it would sleep the block until it was needed again, but that lead to much

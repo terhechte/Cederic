@@ -13,12 +13,12 @@ You don't. Yet.
 
 
 #### Status
-- Version 0.0.1
+- Version 0.0.2
 - Lots of todos in the source
 - No unit tests yet
 - Most API not implemented yet
-- Leaks memory
-- High CPU consumption (10% for 500 agents)
+- ~~Leaks memory~~
+- ~~High CPU consumption (10% for 500 idle agents)~~
 
 #### What's with the name?
 [Cederic is the name of Agent 0011](http://en.wikipedia.org/wiki/00_Agent): Mentioned briefly in the novel Moonraker as vanishing while on assignment in Singapore.
@@ -33,6 +33,20 @@ You don't. Yet.
 * https://developer.apple.com/library/ios/documentation/Performance/Reference/GCD_libdispatch_Ref/#//apple_ref/c/macro/DISPATCH_QUEUE_CONCURRENT
 * http://stackoverflow.com/questions/1550658/dispatch-queues-how-to-tell-if-theyre-running-and-how-to-stop-them
 * http://blog.csdn.net/chuanyituoku/article/details/17473743
+* http://www.objc.io/issue-2/low-level-concurrency-apis.html
+
+#### KQueue
+* http://www.opensource.apple.com/source/xnu/xnu-1456.1.26/tools/tests/xnu_quick_test/kqueue_tests.c
+* https://stuff.mit.edu/afs/sipb/project/freebsd/head/tools/regression/kqueue/user.c
+* http://stackoverflow.com/questions/16072395/using-kqueue-for-evfilt-user
+* http://wanproxy.org/svn/trunk/event/event_poll_kqueue.cc
+* http://julipedia.meroh.net/2004/10/example-of-kqueue.html
+* https://www.freebsd.org/cgi/man.cgi?query=kqueue
+* http://dev.eltima.com/post/93497713759/interacting-with-c-pointers-in-swift-part-2
+* http://www.sitepoint.com/using-legacy-c-apis-swift/
+* http://stackoverflow.com/questions/24058906/printing-a-variable-memory-address-in-swift
+* https://code.openhub.net/file?fid=NoLWjNE3u4rGljKdSnTH06aaCdY&cid=A2IwCo_X-fA&s=%22%23define%20EV_SET%22&fp=133476&mp,=1&ml=1&me=1&md=1&projSelected=true#L0
+* http://stackoverflow.com/questions/24146488/swift-pass-uninitialized-c-structure-to-imported-c-function
 
 ##### Swift
 * http://www.codingexplorer.com/structures-swift/
