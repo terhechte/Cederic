@@ -8,6 +8,9 @@ Agents provide shared access to mutable state. They allow non-blocking (asynchro
 
 > **TLDR** Agents wrap data to allow you non-blocking, thread-safe, asynchrounous access & modification
 
+#### How to use?
+You don't. Yet.
+
 
 #### Status
 - Version 0.0.1

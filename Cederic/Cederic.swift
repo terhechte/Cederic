@@ -19,6 +19,8 @@ TODO:
 - [ ] this is an undocumented mess. make it useful
 - [ ] solo and blocking actions
 - [ ] move most methods out of the class so that they're more functional and can be curried etc (i.e. send(agent, clojure)
+- [ ] make the kMaountOfPooledQueues dependent upon the cores in a machine
+- [ ] don't just randomly select a queue in the AgentQueueManager, but the queue with the least amount of operations, or at least the longest-non-added one. (could use atomic operations to store this)
 Most of the clojure stuff:
 - [ ] Remove a Watch
 - [ ] The watch fn must be a fn of 4 args: a key, the reference, its old-state, its new-state.
@@ -36,6 +38,10 @@ A user event is triggered for output with the following:
 NOTE_TRIGGER       Cause the event to be triggered.
 
 - dispatch_group/barrier: http://www.objc.io/issue-2/low-level-concurrency-apis.html
+
+Notes:
+- Tried to use dispatch_after instead of usleep, as I expected it would sleep the block until it was needed again, but that lead to much
+  worse performance.
 
 */
 
@@ -67,6 +73,8 @@ class AgentQueueManager {
     }
 }
 
+// FIXME: Make sure this will only be evaluated once!
+// maybe dispatch-once it?
 var queueManager = AgentQueueManager()
 
 
@@ -134,8 +142,8 @@ public class Agent<T> {
             watch(newValue)
         }
     }
+    
     func process() {
-        // TODO: Instead of sleep, could do dispatch_after and at the end call process again
         dispatch_async(queueManager.agentProcessQueue, { () -> Void in
             while (!self.stop) {
                
@@ -164,7 +172,8 @@ public class Agent<T> {
                     }
                 })
                 
-                usleep(1000)
+                let milliseconds:useconds_t  = 10
+                usleep(milliseconds * 1000)
             }
         })
     }
