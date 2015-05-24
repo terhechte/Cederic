@@ -15,6 +15,7 @@ TODO:
 - [ ] 10% CPU on Retina 13" (2012) with 5000 idle agents. No leaks. Much better.
 - [ ] 0% CPU on Retina 13" (2012) with 50000 idle agents. No leaks.
 - [ ] 42% CPU on Retina 13" (2012) with 50000 agents and (around) 1000 data updates / send calls per second
+- [ ] 45% CPU on Retina 13" (2012) with 50000 agents and (around) 1000 data updates / send calls per second using abstracted-away Kjue Library for KQueue
 
 - [ ] make .value bindings compatible (willChangeValue..)
 - [ ] add lots and lots of tests
@@ -91,8 +92,8 @@ class AgentQueueManager {
                         if let op = self.operations[sx] {
                             op()
                         }
-                        dataString.destroy()
-                        dataString.dealloc(1)
+//                        dataString.destroy()
+//                        dataString.dealloc(1)
                     })
                 }
             }
@@ -147,6 +148,7 @@ public class Agent<T> {
             let event = KjueEvent(filter: KjueFilter.UserEvent(identifier: kKqueueUserIdentifier,
                 fflags: [KjueFilter.KjueFilterFlags.UserEventFlags.Trigger], data: 0),
                 actions: [KjueActions.Enable], udata: self.opidx_c)
+            post(queueManager.kQueue, event)
         })
     }
     

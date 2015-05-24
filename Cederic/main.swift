@@ -32,9 +32,9 @@ var s = 0
 while(true) {
     sleep(1)
     var c = 0
-//    for ag in agents {
-//        c += (ag.value - 5)
-//    }
+    for ag in agents {
+        c += (ag.value - 5)
+    }
     println("after \(s) seconds \(c) iterations")
     s += 1
 }

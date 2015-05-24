@@ -13,12 +13,22 @@ You don't. Yet.
 
 
 #### Status
-- Version 0.0.2
+- Version 0.0.3
 - Lots of todos in the source
 - No unit tests yet
 - Most API not implemented yet
-- ~~Leaks memory~~
+- Leaks memory
 - ~~High CPU consumption (10% for 500 idle agents)~~
+
+##### Version 0.0.3
+- Moved Kqueue operations in seperate Kjue library (will be a separate library soon)
+- Dictionary-Based approach of flagging dirty processes by sending the dict key via the kqueue event, consumes far less cpu
+- Now 50.0000 Agents can do 1000 (simple) data updates at 45% CPU on an old 2012 Retina 13" Macbook
+- However, introduced a new memory leak
+
+##### Version 0.0.2
+- Switched to Kqueue for blocking calls instead of polling / sleeping
+- Code Cleanup
 
 #### What's with the name?
 [Cederic is the name of Agent 0011](http://en.wikipedia.org/wiki/00_Agent): Mentioned briefly in the novel Moonraker as vanishing while on assignment in Singapore.
