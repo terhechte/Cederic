@@ -17,13 +17,16 @@ You don't. Yet.
 - Lots of todos in the source
 - No unit tests yet
 - Most API not implemented yet
-- Leaks memory
+- High memory consumption for many agents (60 mb vs. 4.5 mb for a similar non-asynchronous simple loop over such a structure)
+- Leaks memory (Actually not so sure, memory rises by about 10mb but then doesn't. May be due to Swift caching)
+  10MB memory growth after ~4500000 data updates over the course of 2 hours (50.000 agents)
 - ~~High CPU consumption (10% for 500 idle agents)~~
 
 ##### Version 0.0.3
 - Moved Kqueue operations in seperate Kjue library (will be a separate library soon)
 - Dictionary-Based approach of flagging dirty processes by sending the dict key via the kqueue event, consumes far less cpu
-- Now 50.0000 Agents can do 1000 (simple) data updates at 45% CPU on an old 2012 Retina 13" Macbook
+- Now 50.0000 Agents can do 1000 (simple) data updates at 30% CPU on an old 2012 Retina 13" Macbook.
+  Similar data updates on a non-dispatched, simple loop consume around 2-3%
 - However, introduced a new memory leak
 
 ##### Version 0.0.2

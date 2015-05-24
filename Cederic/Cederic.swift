@@ -11,11 +11,12 @@ import Dispatch
 
 /*
 TODO:
-- [ ] 12% CPU on Retina 13" (2012) with 500 idle agents. Also leaks memory
-- [ ] 10% CPU on Retina 13" (2012) with 5000 idle agents. No leaks. Much better.
-- [ ] 0% CPU on Retina 13" (2012) with 50000 idle agents. No leaks.
-- [ ] 42% CPU on Retina 13" (2012) with 50000 agents and (around) 1000 data updates / send calls per second
-- [ ] 45% CPU on Retina 13" (2012) with 50000 agents and (around) 1000 data updates / send calls per second using abstracted-away Kjue Library for KQueue
+- 12% CPU on Retina 13" (2012) with 500 idle agents. Also leaks memory
+- 10% CPU on Retina 13" (2012) with 5000 idle agents. No leaks. Much better.
+- 0% CPU on Retina 13" (2012) with 50000 idle agents. No leaks.
+- 42% CPU on Retina 13" (2012) with 50000 agents and (around) 1000 data updates / send calls per second
+- 45% CPU on Retina 13" (2012) with 50000 agents and (around) 1000 data updates / send calls per second using abstracted-away Kjue Library for KQueue
+- 30% CPU as a Release Build (Same configuration as above)
 
 - [ ] make .value bindings compatible (willChangeValue..)
 - [ ] add lots and lots of tests
