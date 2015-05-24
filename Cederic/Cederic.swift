@@ -32,30 +32,11 @@ Most of the clojure stuff:
 - [ ] restarting
 - [x] update the code to use barriers
 
-Try removing the usleep by one of those means:
-- kqueue: http://www.freebsd.org/cgi/man.cgi?query=kqueue&sektion=2
-EVFILT_USER    Establishes	a user event identified	by ident which is not
-associated with any	kernel mechanism but is	triggered by
-user level code.  The lower	24 bits	of the fflags may be
-used for user defined flags	and manipulated	using the fol-
-lowing:
-A user event is triggered for output with the following:
-NOTE_TRIGGER       Cause the event to be triggered.
-
-- dispatch_group/barrier: 
-
-Notes:
-- Tried to use dispatch_after instead of usleep, as I expected it would sleep the block until it was needed again, but that lead to much
-  worse performance.
-
 */
 
 let kAmountOfPooledQueues = 4
+let kKqueueUserIdentifier = UInt(0x6c0176ef) // a random number
 
-
-//----
-// Maybe name for kQueue library: kqueue... kjue as in queue. which is the pronounciation of Q (technical guy from james bond)
-//----
 
 
 /*!
@@ -73,19 +54,16 @@ class AgentQueueManager {
         return p
     }()
     var operations: [String: ()->()] = [:]
+    var kQueue: KjueQueue
     
     typealias AgentQueueOPID = String
     
     init() {
+        // Register a Kjue Queue that filters user events
+        self.kQueue = KjueQueue(name: "com.stylemac.userEventKqueue", filters: [KjueFilter.UserEvent(identifier: kKqueueUserIdentifier, fflags: [], data: 0)])
         self.perform()
     }
     
-    /* // compiler doesn't like this. should file a radar
-    lazy var agentQueuePool: [dispatch_queue_t] = { ()->[dispatch_queue_t] in
-        return 0...4.map { (n: Int)->dispatch_queue_t in
-            dispatch_queue_create("AgentPoolQueue-\(n)", DISPATCH_QUEUE_SERIAL)
-        }
-    }()*/
     var anyPoolQueue: dispatch_queue_t {
         let pos = Int(arc4random_uniform(UInt32(kAmountOfPooledQueues) + UInt32(1)))
         return agentQueuePool[pos]
@@ -101,50 +79,22 @@ class AgentQueueManager {
     
     func perform() {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
-            var lstv = 0
-            var evlist = UnsafeMutablePointer<kevent>.alloc(10)
             while (true) {
-                
-                
-                let newEvent = kevent(k, nil, 0, evlist, 10, nil)
-                
-                if newEvent > 0 {
+                for anEvent in self.kQueue {
                     
+                    let dataString = UnsafeMutablePointer<String>(anEvent.udata)
                     
-                    for ix in 0..<newEvent {
-                        
-                        let uvx = evlist[Int(ix)].udata
-                        let px = UnsafeMutablePointer<String>(uvx)
-                        let sx = px.memory
-//                        println("receiving: \(lstv) has: \(px.memory) eventcount: \(newEvent)")
-                        
-                        //                    println("got events (\(evlist[0].data))", address(&evlist))
-//                        println("ev: \(px.memory) c: \(newEvent)")
-//                        if Int(px.memory) != Int(lstv) {
-//                            println("missed a package! is: \(lstv) has: \(px.memory) eventcount: \(newEvent)")
-//                        }
-//                        lstv += 1
-                        
-                        dispatch_async(self.agentConcurrentQueue, { () -> Void in
-                            // FIXME: UNSAFE!!
-                            if let op = self.operations[sx] {
-                                op()
-                            }
-                            px.destroy()
-                            px.dealloc(1)
-                            //                            self.operations.map {op in op()}
-                        })
-                    }
+                    let sx = dataString.memory
                     
-                    
-                    let cx = EV_DISABLE
-                    let fx = 0
-                    var ev = kevent(ident: UInt(42), filter: Int16(EVFILT_USER), flags: UInt16(cx), fflags: UInt32(fx), data: Int(0), udata: ud)
-                    let er = kevent(k, &ev, 1, nil, 0, nil)
+                    dispatch_async(self.agentConcurrentQueue, { () -> Void in
+                        // FIXME: UNSAFE!!
+                        if let op = self.operations[sx] {
+                            op()
+                        }
+                        dataString.destroy()
+                        dataString.dealloc(1)
+                    })
                 }
-                
-//                let milliseconds:useconds_t  = 10
-//                usleep(milliseconds * 1000)
             }
         })
     }
@@ -177,7 +127,8 @@ public class Agent<T> {
     private var watches:[AgentWatch]
     private var actions: [(AgentSendType, AgentAction)]
     private var stop = false
-    private var opidx: AgentQueueManager.AgentQueueOPID?
+    private var opidx: AgentQueueManager.AgentQueueOPID = ""
+    private var opidx_c: UnsafeMutablePointer<String> = nil
     
     init(initialState: T, validator: AgentValidator?) {
         
@@ -186,27 +137,33 @@ public class Agent<T> {
         self.watches = []
         self.actions = []
         self.opidx = queueManager.add(self.process)
+        self.opidx_c = UnsafeMutablePointer<String>.alloc(1)
+        self.opidx_c.initialize(self.opidx)
+    }
+    
+    func sendToManager(fn: AgentAction, tp: AgentSendType) {
+        dispatch_async(queueManager.agentBlockQueue, { () -> Void in
+            self.actions.append((tp, fn))
+            let event = KjueEvent(filter: KjueFilter.UserEvent(identifier: kKqueueUserIdentifier,
+                fflags: [KjueFilter.KjueFilterFlags.UserEventFlags.Trigger], data: 0),
+                actions: [KjueActions.Enable], udata: self.opidx_c)
+        })
     }
     
     func send(fn: AgentAction) {
-        dispatch_async(queueManager.agentBlockQueue, { () -> Void in
-            self.actions.append((AgentSendType.Pooled, fn))
-            self.opidx.map {i in swKqueuePostEvent(i)}
-            //swKqueuePostEvent(self.opidx)
-        })
+        self.sendToManager(fn, tp: AgentSendType.Pooled)
     }
+    
     func sendOff(fn: AgentAction) {
-        dispatch_async(queueManager.agentBlockQueue, { () -> Void in
-            self.actions.append((AgentSendType.Solo, fn))
-            self.opidx.map {i in swKqueuePostEvent(i)}
-            //swKqueuePostEvent(self.opidx)
-        })
+        self.sendToManager(fn, tp: AgentSendType.Solo)
     }
     func addWatch(watch: AgentWatch) {
         self.watches.append(watch)
     }
     func destroy() {
         self.stop = true
+        self.opidx_c.destroy()
+        self.opidx_c.dealloc(1)
     }
     func calculate(f: AgentAction) {
         let newValue = f(self.state)
