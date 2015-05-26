@@ -17,6 +17,7 @@ TODO:
 - 42% CPU on Retina 13" (2012) with 50000 agents and (around) 1000 data updates / send calls per second
 - 45% CPU on Retina 13" (2012) with 50000 agents and (around) 1000 data updates / send calls per second using abstracted-away Kjue Library for KQueue
 - 30% CPU as a Release Build (Same configuration as above)
+- 27% CPU as a Release Build (Same configuration as above)
 
 - [ ] make .value bindings compatible (willChangeValue..)
 - [ ] add lots and lots of tests
@@ -37,8 +38,35 @@ Most of the clojure stuff:
 */
 
 let kAmountOfPooledQueues = 4
-let kKqueueUserIdentifier = UInt(0x6c0176ef) // a random number
+let kKqueueUserIdentifier = UInt(0x6c0176cf) // a random number
 
+func setupQueue() -> Int32 {
+    let k = kqueue()
+    return k
+}
+
+func postToQueue(q: Int32, value: UnsafeMutablePointer<Void>) -> Int32 {
+    let flags = EV_ENABLE
+    let fflags = NOTE_TRIGGER
+    var kev: kevent = kevent(ident: UInt(kKqueueUserIdentifier), filter: Int16(EVFILT_USER), flags: UInt16(flags), fflags: UInt32(fflags), data: Int(0), udata: value)
+    let newEvent = kevent(q, &kev, 1, nil, 0, nil)
+    return newEvent
+}
+
+func readFromQeue(q: Int32) -> UnsafeMutablePointer<Void> {
+    var evlist = UnsafeMutablePointer<kevent>.alloc(1)
+    let flags = EV_ADD | EV_CLEAR | EV_ENABLE
+    var kev: kevent = kevent(ident: UInt(kKqueueUserIdentifier), filter: Int16(EVFILT_USER), flags: UInt16(flags), fflags: UInt32(0), data: Int(0), udata: nil)
+    
+    let newEvent = kevent(q, &kev, 1, evlist, 1, nil)
+    
+    let m = evlist[0].udata
+    
+    evlist.destroy()
+    evlist.dealloc(1)
+    
+    return m
+}
 
 
 /*!
@@ -56,18 +84,19 @@ class AgentQueueManager {
         return p
     }()
     var operations: [String: ()->()] = [:]
-    var kQueue: KjueQueue
+    var kQueue: Int32
     
     typealias AgentQueueOPID = String
     
     init() {
         // Register a Kjue Queue that filters user events
-        self.kQueue = KjueQueue(name: "com.stylemac.userEventKqueue", filters: [KjueFilter.UserEvent(identifier: kKqueueUserIdentifier, fflags: [], data: 0)])
+        self.kQueue = kqueue()
         self.perform()
     }
     
     var anyPoolQueue: dispatch_queue_t {
         let pos = Int(arc4random_uniform(UInt32(kAmountOfPooledQueues) + UInt32(1)))
+//        let pos = 0
         return agentQueuePool[pos]
     }
     
@@ -82,19 +111,15 @@ class AgentQueueManager {
     func perform() {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
             while (true) {
-                for anEvent in self.kQueue {
-                    
-                    let dataString = UnsafeMutablePointer<String>(anEvent.udata)
-                    
+                let data = readFromQeue(self.kQueue)
+                if data != nil {
+                    let dataString = UnsafeMutablePointer<String>(data)
                     let sx = dataString.memory
                     
                     dispatch_async(self.agentConcurrentQueue, { () -> Void in
-                        // FIXME: UNSAFE!!
                         if let op = self.operations[sx] {
                             op()
                         }
-//                        dataString.destroy()
-//                        dataString.dealloc(1)
                     })
                 }
             }
@@ -130,7 +155,6 @@ public class Agent<T> {
     private var actions: [(AgentSendType, AgentAction)]
     private var stop = false
     private var opidx: AgentQueueManager.AgentQueueOPID = ""
-    private var opidx_c: UnsafeMutablePointer<String> = nil
     
     init(initialState: T, validator: AgentValidator?) {
         
@@ -139,17 +163,12 @@ public class Agent<T> {
         self.watches = []
         self.actions = []
         self.opidx = queueManager.add(self.process)
-        self.opidx_c = UnsafeMutablePointer<String>.alloc(1)
-        self.opidx_c.initialize(self.opidx)
     }
     
     func sendToManager(fn: AgentAction, tp: AgentSendType) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.actions.append((tp, fn))
-            let event = KjueEvent(filter: KjueFilter.UserEvent(identifier: kKqueueUserIdentifier,
-                fflags: [KjueFilter.KjueFilterFlags.UserEventFlags.Trigger], data: 0),
-                actions: [KjueActions.Enable], udata: self.opidx_c)
-            post(queueManager.kQueue, event)
+            postToQueue(queueManager.kQueue, &self.opidx)
         })
     }
     
@@ -160,14 +179,15 @@ public class Agent<T> {
     func sendOff(fn: AgentAction) {
         self.sendToManager(fn, tp: AgentSendType.Solo)
     }
+    
     func addWatch(watch: AgentWatch) {
         self.watches.append(watch)
     }
+    
     func destroy() {
         self.stop = true
-        self.opidx_c.destroy()
-        self.opidx_c.dealloc(1)
     }
+    
     func calculate(f: AgentAction) {
         let newValue = f(self.state)
         if let v = self.validator {

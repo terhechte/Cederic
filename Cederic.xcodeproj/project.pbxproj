@@ -12,8 +12,6 @@
 		4D7223961B0E782200DB1B6D /* Readme.md in Sources */ = {isa = PBXBuildFile; fileRef = 4D7223951B0E782200DB1B6D /* Readme.md */; };
 		4D7223A01B0F09CD00DB1B6D /* CedericTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D72239F1B0F09CD00DB1B6D /* CedericTests.swift */; };
 		4D7223A41B0F09D600DB1B6D /* Cederic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7223931B0E77AC00DB1B6D /* Cederic.swift */; };
-		4D7223A61B0FC8C200DB1B6D /* Kjue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7223A51B0FC8C200DB1B6D /* Kjue.swift */; };
-		4D7223A71B0FC8C200DB1B6D /* Kjue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7223A51B0FC8C200DB1B6D /* Kjue.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,8 +34,6 @@
 		4D72239B1B0F09CD00DB1B6D /* CedericTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CedericTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D72239E1B0F09CD00DB1B6D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4D72239F1B0F09CD00DB1B6D /* CedericTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CedericTests.swift; sourceTree = "<group>"; };
-		4D7223A51B0FC8C200DB1B6D /* Kjue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Kjue.swift; sourceTree = "<group>"; };
-		4D7223A81B12201800DB1B6D /* oldcode */ = {isa = PBXFileReference; lastKnownFileType = text; path = oldcode; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,8 +78,6 @@
 				4D72238C1B0E778600DB1B6D /* main.swift */,
 				4D7223931B0E77AC00DB1B6D /* Cederic.swift */,
 				4D7223951B0E782200DB1B6D /* Readme.md */,
-				4D7223A51B0FC8C200DB1B6D /* Kjue.swift */,
-				4D7223A81B12201800DB1B6D /* oldcode */,
 			);
 			path = Cederic;
 			sourceTree = "<group>";
@@ -192,7 +186,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D7223A61B0FC8C200DB1B6D /* Kjue.swift in Sources */,
 				4D72238D1B0E778600DB1B6D /* main.swift in Sources */,
 				4D7223941B0E77AC00DB1B6D /* Cederic.swift in Sources */,
 				4D7223961B0E782200DB1B6D /* Readme.md in Sources */,
@@ -203,7 +196,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D7223A71B0FC8C200DB1B6D /* Kjue.swift in Sources */,
 				4D7223A01B0F09CD00DB1B6D /* CedericTests.swift in Sources */,
 				4D7223A41B0F09D600DB1B6D /* Cederic.swift in Sources */,
 			);
@@ -355,6 +347,7 @@
 				4D7223921B0E778600DB1B6D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4D7223A11B0F09CD00DB1B6D /* Build configuration list for PBXNativeTarget "CedericTests" */ = {
 			isa = XCConfigurationList;
@@ -363,6 +356,7 @@
 				4D7223A31B0F09CD00DB1B6D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
