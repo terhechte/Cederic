@@ -240,7 +240,10 @@ dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), { () 
     while (true) {
         usleep(1000)
         let pos = Int(arc4random_uniform(UInt32(maxagents)))
-        agents[pos].send({n in return n + 1})
+        agents[pos].send({n in
+            usleep(arc4random_uniform(500))
+            return n + 1}
+        )
     }
 })
 
