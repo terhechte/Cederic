@@ -28,8 +28,8 @@ TODO:
 - [ ] make the kMaountOfPooledQueues dependent upon the cores in a machine
 - [ ] don't just randomly select a queue in the AgentQueueManager, but the queue with the least amount of operations, or at least the longest-non-added one. (could use atomic operations to store this)
 Most of the clojure stuff:
-- [ ] Remove a Watch
-- [ ] The watch fn must be a fn of 4 args: a key, the reference, its old-state, its new-state.
+- [x] Remove a Watch
+- [x] The watch fn must be a fn of 4 args: a key, the reference, its old-state, its new-state.
 - [ ] error handling (see https://github.com/clojure/clojure/blob/028af0e0b271aa558ea44780e5d951f4932c7842/src/clj/clojure/core.clj#L2002
 - [ ] restarting
 - [x] update the code to use barriers
@@ -200,8 +200,8 @@ enum AgentSendType {
 public class Agent<T> {
     
     typealias AgentAction = (T)->T
-    typealias AgentValidator = (T)->Bool
-    typealias AgentWatch = (T)->Void
+    typealias AgentValidator = (T, T)->Bool
+    typealias AgentWatch = (String, Agent<T>, T, T)->Void
     
     public var value: T {
         return state
@@ -209,7 +209,7 @@ public class Agent<T> {
     
     private var state: T
     private let validator: AgentValidator?
-    private var watches:[AgentWatch]
+    private var watches: [String: AgentWatch]
     private var actions: [(AgentSendType, AgentAction)]
     private var opidx: AgentQueueManager.AgentQueueOPID = ""
     
@@ -221,7 +221,7 @@ public class Agent<T> {
     init(initialState: T, validator: AgentValidator?) {
         self.state = initialState
         self.validator = validator
-        self.watches = []
+        self.watches = [:]
         self.actions = []
         self.opidx = queueManager.add(self.process)
     }
@@ -247,9 +247,29 @@ public class Agent<T> {
     
     /**
     Add a watch to the agent. Watches will be notified of any state changes
+    :param: key The identifier of the watch
+    :param: watch The agentwatch fn.
+    
+    The AgentWatch will be called with the following parameters:
+    1. The watch identifier key
+    2. The current agent
+    3. The old state
+    4. The new state
     */
-    func addWatch(watch: AgentWatch) {
-        self.watches.append(watch)
+    func addWatch(key: String, watch: AgentWatch) {
+        dispatch_async(queueManager.agentBlockQueue, { () -> Void in
+            self.watches[key] = watch
+        })
+    }
+    
+    /**
+    Remove a watch from the agent.
+    :param: key The identifier of the watch.
+    */
+    func removeWatch(key: String) {
+        dispatch_async(queueManager.agentBlockQueue, { () -> Void in
+            self.watches.removeValueForKey(key)
+        })
     }
     
     private func sendToManager(fn: AgentAction, tp: AgentSendType) {
@@ -262,16 +282,16 @@ public class Agent<T> {
     private func calculate(f: AgentAction) {
         let newValue = f(self.state)
         if let v = self.validator {
-            if !v(newValue) {
+            if !v(self.state, newValue) {
                 return
             }
         }
         
-        self.state = newValue
-        
-        for watch in self.watches {
-            watch(newValue)
+        for (key, watch) in self.watches {
+            watch(key, self, self.state, newValue)
         }
+        
+        self.state = newValue
     }
     
     private func process() {

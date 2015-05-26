@@ -13,7 +13,8 @@ You don't. Yet.
 
 
 #### Status
-- Version 0.0.3
+
+- Version 0.0.4
 - Lots of todos in the source
 - No unit tests yet
 - Most API not implemented yet
@@ -21,6 +22,12 @@ You don't. Yet.
 - Leaks memory (Actually not so sure, memory rises by about 10mb but then doesn't. May be due to Swift caching)
   10MB memory growth after ~4500000 data updates over the course of 2 hours (50.000 agents)
 - ~~High CPU consumption (10% for 500 idle agents)~~
+
+##### Version 0.0.4
+- Removed the Kjue library in order to simplify the code
+- Added documentation
+- Added support for watches and validitators
+
 
 ##### Version 0.0.3
 - Moved Kqueue operations in seperate Kjue library (will be a separate library soon)

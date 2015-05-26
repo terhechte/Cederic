@@ -233,7 +233,7 @@ println("end")
 let maxagents = 50000
 var agents: [Agent<Int>] = []
 for i in 1...maxagents {
-    agents.append(Agent(initialState: 5, validator: {n in return n < 100}))
+    agents.append(Agent(initialState: 5, validator: {(o, n) in return n < 100}))
 }
 
 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), { () -> Void in
