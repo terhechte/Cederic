@@ -104,7 +104,7 @@ private class AgentQueueManager {
     /** 
     Add a new agent process operation to the internal operations dict
     
-    :param op A process operation that will be called whenever new actions for the agent come in
+    :param: op A process operation that will be called whenever new actions for the agent come in
     :returns: The unique queue id of this agent in the manager. Used to identify the agent to the manager in subsequent operations
     */
     func add(op: ()->()) -> AgentQueueOPID {
@@ -113,6 +113,17 @@ private class AgentQueueManager {
             self.operations[uuid] = op
         })
         return uuid
+    }
+    
+    /**
+    Remove an agent process from the internal operations dict
+
+    :param: opid The unique queue id of the agent in the manager
+    */
+    func remove(opid: String) {
+        dispatch_barrier_async(self.agentProcessQueue , { () -> Void in
+            self.operations.removeValueForKey(opid)
+        })
     }
     
     /** 
@@ -176,22 +187,19 @@ enum AgentSendType {
     Features:
 
     - Use watches to get agent change notifications
-    - Use validators to validate all change operations
     - Use sendOff instead of send if the operation will take a long amount of time
 */
 
 public class Agent<T> {
     
-    typealias AgentAction = (T)->T
-    typealias AgentValidator = (T, T)->Bool
-    typealias AgentWatch = (String, Agent<T>, T, T)->Void
+    typealias AgentAction = (inout T)->Void
+    typealias AgentWatch = (String, Agent<T>, T)->Void
     
     public var value: T {
         return state
     }
     
     private var state: T
-    private let validator: AgentValidator?
     private var watches: [String: AgentWatch]
     private var actions: [(AgentSendType, AgentAction)]
     private var opidx: AgentQueueManager.AgentQueueOPID = ""
@@ -202,12 +210,15 @@ public class Agent<T> {
     :param: initialState The internal state that the agent should store
     :param: validator A validation function which will be given the proposed new state and the old state. Returns bool success if the state transition is valid
     */
-    init(initialState: T, validator: AgentValidator?) {
+    init(initialState: T) {
         self.state = initialState
-        self.validator = validator
         self.watches = [:]
         self.actions = []
         self.opidx = queueManager.add(self.process)
+    }
+    
+    deinit {
+        queueManager.remove(self.opidx)
     }
     
     /**
@@ -239,8 +250,7 @@ public class Agent<T> {
     
     1. The watch identifier key
     2. The current agent
-    3. The old state
-    4. The new state
+    3. The new state
     */
     func addWatch(key: String, watch: AgentWatch) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
@@ -267,18 +277,11 @@ public class Agent<T> {
     }
     
     private func calculate(f: AgentAction) {
-        let newValue = f(self.state)
-        if let v = self.validator {
-            if !v(self.state, newValue) {
-                return
-            }
-        }
+        f(&self.state)
         
         for (key, watch) in self.watches {
-            watch(key, self, self.state, newValue)
+            watch(key, self, self.state)
         }
-        
-        self.state = newValue
     }
     
     private func process() {
