@@ -13,21 +13,22 @@ You don't. Yet.
 
 
 #### Status
-
+- 27% CPU as a Release Build on Retina 13" (2012) with 50000 agents and (around) 1000 data updates
 - Version 0.0.4
-- Lots of todos in the source
 - No unit tests yet
-- Most API not implemented yet
 - High memory consumption for many agents (60 mb vs. 4.5 mb for a similar non-asynchronous simple loop over such a structure)
-- Leaks memory (Actually not so sure, memory rises by about 10mb but then doesn't. May be due to Swift caching)
-  10MB memory growth after ~4500000 data updates over the course of 2 hours (50.000 agents)
-- ~~High CPU consumption (10% for 500 idle agents)~~
+- 10MB memory growth (from 50mb to 60mb) after ~4500000 data updates over the course of 2 hours (50.000 agents) 
+
+#### TODO
+- [ ] add tests
+- [ ] define operators for easy equailty, changing and comparison
+- [ ] Implement NSKeyValueObserving (would require subclassing from NSObject)
+
 
 ##### Version 0.0.4
 - Removed the Kjue library in order to simplify the code
 - Added documentation
-- Added support for watches and validitators
-
+- Added support for watches and validators
 
 ##### Version 0.0.3
 - Moved Kqueue operations in seperate Kjue library (will be a separate library soon)
@@ -67,10 +68,6 @@ You don't. Yet.
 * http://stackoverflow.com/questions/24058906/printing-a-variable-memory-address-in-swift
 * https://code.openhub.net/file?fid=NoLWjNE3u4rGljKdSnTH06aaCdY&cid=A2IwCo_X-fA&s=%22%23define%20EV_SET%22&fp=133476&mp,=1&ml=1&me=1&md=1&projSelected=true#L0
 * http://stackoverflow.com/questions/24146488/swift-pass-uninitialized-c-structure-to-imported-c-function
-
-##### Swift
-* http://www.codingexplorer.com/structures-swift/
-* http://sketchytech.blogspot.de/2014/10/becoming-less-afraid-of-unsafe-mutable.html
 
 ##### Clojure Agents
 * http://clojure.org/agents

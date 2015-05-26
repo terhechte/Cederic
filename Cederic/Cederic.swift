@@ -9,38 +9,12 @@
 import Foundation
 import Dispatch
 
-/*
-TODO:
-- 12% CPU on Retina 13" (2012) with 500 idle agents. Also leaks memory
-- 10% CPU on Retina 13" (2012) with 5000 idle agents. No leaks. Much better.
-- 0% CPU on Retina 13" (2012) with 50000 idle agents. No leaks.
-- 42% CPU on Retina 13" (2012) with 50000 agents and (around) 1000 data updates / send calls per second
-- 45% CPU on Retina 13" (2012) with 50000 agents and (around) 1000 data updates / send calls per second using abstracted-away Kjue Library for KQueue
-- 30% CPU as a Release Build (Same configuration as above)
-- 27% CPU as a Release Build (Same configuration as above)
-
-- [ ] make .value bindings compatible (willChangeValue..)
-- [ ] add lots and lots of tests
-- [ ] define operators for easy equailty
-- [x] find a better way to process the blocks than usleep (select?)
-- [x] this is an undocumented mess. make it useful
-- [x] solo and blocking actions
-- [ ] make the kMaountOfPooledQueues dependent upon the cores in a machine
-- [ ] don't just randomly select a queue in the AgentQueueManager, but the queue with the least amount of operations, or at least the longest-non-added one. (could use atomic operations to store this)
-Most of the clojure stuff:
-- [x] Remove a Watch
-- [x] The watch fn must be a fn of 4 args: a key, the reference, its old-state, its new-state.
-- [ ] error handling (see https://github.com/clojure/clojure/blob/028af0e0b271aa558ea44780e5d951f4932c7842/src/clj/clojure/core.clj#L2002
-- [ ] restarting
-- [x] update the code to use barriers
-
-*/
-
 let kAmountOfPooledQueues = 4
 let kKqueueUserIdentifier = UInt(0x6c0176cf) // a random number
 
-/**
+/** 
     Create a new kqueue Object
+    
     :returns: The file descriptor of the kernel queue
 */
 private func setupQueue() -> Int32 {
@@ -48,8 +22,9 @@ private func setupQueue() -> Int32 {
     return k
 }
 
-/**
+/** 
     Post a new message to a kqueue. The payload can be a pointer to something.
+
     :param: q A kqueue file descriptor, as returned by *setupQueue()*
     :param: value A pointer to a payload you wish to post to the kqueue
     :returns: A number > 0 for successful posting, and -1 if there is an error
@@ -62,8 +37,9 @@ private func postToQueue(queue: Int32, value: UnsafeMutablePointer<Void>) -> Int
     return newEvent
 }
 
-/**
+/** 
     Blocking read a value from a kqueue
+
     :param: q A kqueue file descriptor, as returned by *setupQueue()*
     :returns: A pointer to something. The pointer will be == nil if postToQueue was called with a nil pointer
 
@@ -85,7 +61,7 @@ private func readFromQeue(queue: Int32) -> UnsafeMutablePointer<Void> {
 }
 
 
-/**
+/** 
     Managing infrastructure for the agents. Pools all agents together and calls their process functions
     whenever there the state should change. Also manages the dispatch queues.
 */
@@ -125,7 +101,9 @@ private class AgentQueueManager {
     }
     
     
-    /** Add a new agent process operation to the internal operations dict
+    /** 
+    Add a new agent process operation to the internal operations dict
+    
     :param op A process operation that will be called whenever new actions for the agent come in
     :returns: The unique queue id of this agent in the manager. Used to identify the agent to the manager in subsequent operations
     */
@@ -137,7 +115,8 @@ private class AgentQueueManager {
         return uuid
     }
     
-    /** Runs on a background queue and continously waits for new kqueue events, then takes the AgentQueueOPID out of
+    /** 
+    Runs on a background queue and continously waits for new kqueue events, then takes the AgentQueueOPID out of
     the kqueue event, and performs the process function of the agent identified by the OPID.
     Runs on the system background queue, the processing happens on the agentProcessQueue, and from there on the pool queue
     */
@@ -169,29 +148,33 @@ private class AgentQueueManager {
 private let queueManager = AgentQueueManager()
 
 
-/** Agent can be given operations with two types:
-- Solo: The operation may take a long time to complete, run it on a seperate thread
-- Pooled: It is a fast operation, run it on the internal thread pool
+/** 
+    Agent can be given operations with two types:
+
+    - Solo: The operation may take a long time to complete, run it on a seperate thread
+    - Pooled: It is a fast operation, run it on the internal thread pool
 */
 enum AgentSendType {
     case Solo
     case Pooled
 }
 
-/** Agents provide shared access to mutable state. They allow non-blocking (asynchronous as opposed to synchronous atoms) and independent change of individual locations. Agents are submitted functions which are stored in a mailbox and then executed in order. The agent itself has state, but no logic. The submitted functions modify the state. Using an Agent is more akin to operating on a data-structure than interacting with a service.
+/** 
+    Agents provide shared access to mutable state. They allow non-blocking (asynchronous as opposed to synchronous atoms) and independent change of individual locations. Agents are submitted functions which are stored in a mailbox and then executed in order. The agent itself has state, but no logic. The submitted functions modify the state. Using an Agent is more akin to operating on a data-structure than interacting with a service.
 
     Usage:
+
     1. Initialize the agent with some state:
       let ag: Agent<[Int32]> = Agent([0, 1, 2, 3], nil)
-    2. Update the state by sending it an action
+    2. Update the state by sending it an action (The update will happen asynchronously at some point in the near future)
       ag.send({ s in return s.append(4)})
-    3. The update will happen asynchronously at some point in the future
     4. Retrieve the state of the agent via value:
       let v: [Int32] = ag.value
     5. Add a watch to be notified of any state changes
       ag.addWatch({(o, n) in println("new state \(n), old state \(o)")
 
     Features:
+
     - Use watches to get agent change notifications
     - Use validators to validate all change operations
     - Use sendOff instead of send if the operation will take a long amount of time
@@ -215,6 +198,7 @@ public class Agent<T> {
     
     /**
     Initialize an Agent.
+    
     :param: initialState The internal state that the agent should store
     :param: validator A validation function which will be given the proposed new state and the old state. Returns bool success if the state transition is valid
     */
@@ -247,10 +231,12 @@ public class Agent<T> {
     
     /**
     Add a watch to the agent. Watches will be notified of any state changes
+    
     :param: key The identifier of the watch
     :param: watch The agentwatch fn.
     
     The AgentWatch will be called with the following parameters:
+    
     1. The watch identifier key
     2. The current agent
     3. The old state
@@ -264,6 +250,7 @@ public class Agent<T> {
     
     /**
     Remove a watch from the agent.
+    
     :param: key The identifier of the watch.
     */
     func removeWatch(key: String) {
