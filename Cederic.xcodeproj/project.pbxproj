@@ -7,58 +7,150 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4D72238D1B0E778600DB1B6D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D72238C1B0E778600DB1B6D /* main.swift */; };
-		4D7223941B0E77AC00DB1B6D /* Cederic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7223931B0E77AC00DB1B6D /* Cederic.swift */; };
-		4D7223961B0E782200DB1B6D /* Readme.md in Sources */ = {isa = PBXBuildFile; fileRef = 4D7223951B0E782200DB1B6D /* Readme.md */; };
-		4D7223A01B0F09CD00DB1B6D /* CedericTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D72239F1B0F09CD00DB1B6D /* CedericTests.swift */; };
-		4D7223A41B0F09D600DB1B6D /* Cederic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7223931B0E77AC00DB1B6D /* Cederic.swift */; };
+		4D5A3A231B14DF660006A7B3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5A3A221B14DF660006A7B3 /* AppDelegate.swift */; };
+		4D5A3A251B14DF660006A7B3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D5A3A241B14DF660006A7B3 /* Images.xcassets */; };
+		4D5A3A281B14DF660006A7B3 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D5A3A261B14DF660006A7B3 /* MainMenu.xib */; };
+		4D5A3A721B15B05F0006A7B3 /* Cederic.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D5A3A711B15B05F0006A7B3 /* Cederic.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4D5A3A841B15B05F0006A7B3 /* Cederic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D5A3A6D1B15B05F0006A7B3 /* Cederic.framework */; };
+		4D5A3A851B15B05F0006A7B3 /* Cederic.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4D5A3A6D1B15B05F0006A7B3 /* Cederic.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4D5A3A8D1B15B0950006A7B3 /* Cederic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5A3A8C1B15B0950006A7B3 /* Cederic.swift */; };
+		4D5A3AAA1B15B5B70006A7B3 /* CedericTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5A3AA91B15B5B70006A7B3 /* CedericTests.swift */; };
+		4D5A3AAB1B15B5B70006A7B3 /* Cederic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D5A3A6D1B15B05F0006A7B3 /* Cederic.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		4D5A3A821B15B05F0006A7B3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4D7223811B0E778600DB1B6D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4D5A3A6C1B15B05F0006A7B3;
+			remoteInfo = Cederic;
+		};
+		4D5A3AAC1B15B5B70006A7B3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4D7223811B0E778600DB1B6D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4D5A3A6C1B15B05F0006A7B3;
+			remoteInfo = Cederic;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
-		4D7223871B0E778600DB1B6D /* CopyFiles */ = {
+		4D5A3A5C1B14E7160006A7B3 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			dstPath = "";
+			dstSubfolderSpec = 10;
 			files = (
+				4D5A3A851B15B05F0006A7B3 /* Cederic.framework in Embed Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4D7223891B0E778600DB1B6D /* Cederic */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Cederic; sourceTree = BUILT_PRODUCTS_DIR; };
-		4D72238C1B0E778600DB1B6D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		4D7223931B0E77AC00DB1B6D /* Cederic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cederic.swift; sourceTree = "<group>"; };
-		4D7223951B0E782200DB1B6D /* Readme.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Readme.md; sourceTree = SOURCE_ROOT; };
-		4D72239B1B0F09CD00DB1B6D /* CedericTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CedericTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4D72239E1B0F09CD00DB1B6D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4D72239F1B0F09CD00DB1B6D /* CedericTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CedericTests.swift; sourceTree = "<group>"; };
+		4D5A3A1E1B14DF660006A7B3 /* CedericMacExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CedericMacExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4D5A3A211B14DF660006A7B3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4D5A3A221B14DF660006A7B3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		4D5A3A241B14DF660006A7B3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		4D5A3A271B14DF660006A7B3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		4D5A3A6D1B15B05F0006A7B3 /* Cederic.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Cederic.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4D5A3A701B15B05F0006A7B3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4D5A3A711B15B05F0006A7B3 /* Cederic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Cederic.h; sourceTree = "<group>"; };
+		4D5A3A8C1B15B0950006A7B3 /* Cederic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cederic.swift; sourceTree = "<group>"; };
+		4D5A3AA51B15B5B70006A7B3 /* CedericTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CedericTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4D5A3AA81B15B5B70006A7B3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4D5A3AA91B15B5B70006A7B3 /* CedericTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CedericTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		4D7223861B0E778600DB1B6D /* Frameworks */ = {
+		4D5A3A1B1B14DF660006A7B3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D5A3A841B15B05F0006A7B3 /* Cederic.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4D5A3A691B15B05F0006A7B3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4D7223981B0F09CD00DB1B6D /* Frameworks */ = {
+		4D5A3AA21B15B5B70006A7B3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4D5A3AAB1B15B5B70006A7B3 /* Cederic.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4D5A3A1F1B14DF660006A7B3 /* CedericMacExample */ = {
+			isa = PBXGroup;
+			children = (
+				4D5A3A221B14DF660006A7B3 /* AppDelegate.swift */,
+				4D5A3A241B14DF660006A7B3 /* Images.xcassets */,
+				4D5A3A261B14DF660006A7B3 /* MainMenu.xib */,
+				4D5A3A201B14DF660006A7B3 /* Supporting Files */,
+			);
+			path = CedericMacExample;
+			sourceTree = "<group>";
+		};
+		4D5A3A201B14DF660006A7B3 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				4D5A3A211B14DF660006A7B3 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		4D5A3A6E1B15B05F0006A7B3 /* Cederic */ = {
+			isa = PBXGroup;
+			children = (
+				4D5A3A8C1B15B0950006A7B3 /* Cederic.swift */,
+				4D5A3A711B15B05F0006A7B3 /* Cederic.h */,
+				4D5A3A6F1B15B05F0006A7B3 /* Supporting Files */,
+			);
+			path = Cederic;
+			sourceTree = "<group>";
+		};
+		4D5A3A6F1B15B05F0006A7B3 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				4D5A3A701B15B05F0006A7B3 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		4D5A3AA61B15B5B70006A7B3 /* CedericTests */ = {
+			isa = PBXGroup;
+			children = (
+				4D5A3AA91B15B5B70006A7B3 /* CedericTests.swift */,
+				4D5A3AA71B15B5B70006A7B3 /* Supporting Files */,
+			);
+			path = CedericTests;
+			sourceTree = "<group>";
+		};
+		4D5A3AA71B15B5B70006A7B3 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				4D5A3AA81B15B5B70006A7B3 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		4D7223801B0E778600DB1B6D = {
 			isa = PBXGroup;
 			children = (
-				4D72238B1B0E778600DB1B6D /* Cederic */,
-				4D72239C1B0F09CD00DB1B6D /* CedericTests */,
+				4D5A3A1F1B14DF660006A7B3 /* CedericMacExample */,
+				4D5A3A6E1B15B05F0006A7B3 /* Cederic */,
+				4D5A3AA61B15B5B70006A7B3 /* CedericTests */,
 				4D72238A1B0E778600DB1B6D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -66,49 +158,54 @@
 		4D72238A1B0E778600DB1B6D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4D7223891B0E778600DB1B6D /* Cederic */,
-				4D72239B1B0F09CD00DB1B6D /* CedericTests.xctest */,
+				4D5A3A1E1B14DF660006A7B3 /* CedericMacExample.app */,
+				4D5A3A6D1B15B05F0006A7B3 /* Cederic.framework */,
+				4D5A3AA51B15B5B70006A7B3 /* CedericTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4D72238B1B0E778600DB1B6D /* Cederic */ = {
-			isa = PBXGroup;
-			children = (
-				4D72238C1B0E778600DB1B6D /* main.swift */,
-				4D7223931B0E77AC00DB1B6D /* Cederic.swift */,
-				4D7223951B0E782200DB1B6D /* Readme.md */,
-			);
-			path = Cederic;
-			sourceTree = "<group>";
-		};
-		4D72239C1B0F09CD00DB1B6D /* CedericTests */ = {
-			isa = PBXGroup;
-			children = (
-				4D72239F1B0F09CD00DB1B6D /* CedericTests.swift */,
-				4D72239D1B0F09CD00DB1B6D /* Supporting Files */,
-			);
-			path = CedericTests;
-			sourceTree = "<group>";
-		};
-		4D72239D1B0F09CD00DB1B6D /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				4D72239E1B0F09CD00DB1B6D /* Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		4D5A3A6A1B15B05F0006A7B3 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D5A3A721B15B05F0006A7B3 /* Cederic.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
-		4D7223881B0E778600DB1B6D /* Cederic */ = {
+		4D5A3A1D1B14DF660006A7B3 /* CedericMacExample */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4D7223901B0E778600DB1B6D /* Build configuration list for PBXNativeTarget "Cederic" */;
+			buildConfigurationList = 4D5A3A351B14DF660006A7B3 /* Build configuration list for PBXNativeTarget "CedericMacExample" */;
 			buildPhases = (
-				4D7223851B0E778600DB1B6D /* Sources */,
-				4D7223861B0E778600DB1B6D /* Frameworks */,
-				4D7223871B0E778600DB1B6D /* CopyFiles */,
+				4D5A3A1A1B14DF660006A7B3 /* Sources */,
+				4D5A3A1B1B14DF660006A7B3 /* Frameworks */,
+				4D5A3A1C1B14DF660006A7B3 /* Resources */,
+				4D5A3A5C1B14E7160006A7B3 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4D5A3A831B15B05F0006A7B3 /* PBXTargetDependency */,
+			);
+			name = CedericMacExample;
+			productName = CedericMacExample;
+			productReference = 4D5A3A1E1B14DF660006A7B3 /* CedericMacExample.app */;
+			productType = "com.apple.product-type.application";
+		};
+		4D5A3A6C1B15B05F0006A7B3 /* Cederic */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4D5A3A861B15B05F0006A7B3 /* Build configuration list for PBXNativeTarget "Cederic" */;
+			buildPhases = (
+				4D5A3A681B15B05F0006A7B3 /* Sources */,
+				4D5A3A691B15B05F0006A7B3 /* Frameworks */,
+				4D5A3A6A1B15B05F0006A7B3 /* Headers */,
+				4D5A3A6B1B15B05F0006A7B3 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -116,24 +213,25 @@
 			);
 			name = Cederic;
 			productName = Cederic;
-			productReference = 4D7223891B0E778600DB1B6D /* Cederic */;
-			productType = "com.apple.product-type.tool";
+			productReference = 4D5A3A6D1B15B05F0006A7B3 /* Cederic.framework */;
+			productType = "com.apple.product-type.framework";
 		};
-		4D72239A1B0F09CD00DB1B6D /* CedericTests */ = {
+		4D5A3AA41B15B5B70006A7B3 /* CedericTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4D7223A11B0F09CD00DB1B6D /* Build configuration list for PBXNativeTarget "CedericTests" */;
+			buildConfigurationList = 4D5A3AAE1B15B5B70006A7B3 /* Build configuration list for PBXNativeTarget "CedericTests" */;
 			buildPhases = (
-				4D7223971B0F09CD00DB1B6D /* Sources */,
-				4D7223981B0F09CD00DB1B6D /* Frameworks */,
-				4D7223991B0F09CD00DB1B6D /* Resources */,
+				4D5A3AA11B15B5B70006A7B3 /* Sources */,
+				4D5A3AA21B15B5B70006A7B3 /* Frameworks */,
+				4D5A3AA31B15B5B70006A7B3 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				4D5A3AAD1B15B5B70006A7B3 /* PBXTargetDependency */,
 			);
 			name = CedericTests;
 			productName = CedericTests;
-			productReference = 4D72239B1B0F09CD00DB1B6D /* CedericTests.xctest */;
+			productReference = 4D5A3AA51B15B5B70006A7B3 /* CedericTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -145,10 +243,13 @@
 				LastUpgradeCheck = 0630;
 				ORGANIZATIONNAME = "Benedikt Terhechte";
 				TargetAttributes = {
-					4D7223881B0E778600DB1B6D = {
+					4D5A3A1D1B14DF660006A7B3 = {
 						CreatedOnToolsVersion = 6.3.1;
 					};
-					4D72239A1B0F09CD00DB1B6D = {
+					4D5A3A6C1B15B05F0006A7B3 = {
+						CreatedOnToolsVersion = 6.3.1;
+					};
+					4D5A3AA41B15B5B70006A7B3 = {
 						CreatedOnToolsVersion = 6.3.1;
 					};
 				};
@@ -159,20 +260,38 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 4D7223801B0E778600DB1B6D;
 			productRefGroup = 4D72238A1B0E778600DB1B6D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4D7223881B0E778600DB1B6D /* Cederic */,
-				4D72239A1B0F09CD00DB1B6D /* CedericTests */,
+				4D5A3A1D1B14DF660006A7B3 /* CedericMacExample */,
+				4D5A3A6C1B15B05F0006A7B3 /* Cederic */,
+				4D5A3AA41B15B5B70006A7B3 /* CedericTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		4D7223991B0F09CD00DB1B6D /* Resources */ = {
+		4D5A3A1C1B14DF660006A7B3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D5A3A251B14DF660006A7B3 /* Images.xcassets in Resources */,
+				4D5A3A281B14DF660006A7B3 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4D5A3A6B1B15B05F0006A7B3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4D5A3AA31B15B5B70006A7B3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -182,28 +301,166 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		4D7223851B0E778600DB1B6D /* Sources */ = {
+		4D5A3A1A1B14DF660006A7B3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D72238D1B0E778600DB1B6D /* main.swift in Sources */,
-				4D7223941B0E77AC00DB1B6D /* Cederic.swift in Sources */,
-				4D7223961B0E782200DB1B6D /* Readme.md in Sources */,
+				4D5A3A231B14DF660006A7B3 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4D7223971B0F09CD00DB1B6D /* Sources */ = {
+		4D5A3A681B15B05F0006A7B3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D7223A01B0F09CD00DB1B6D /* CedericTests.swift in Sources */,
-				4D7223A41B0F09D600DB1B6D /* Cederic.swift in Sources */,
+				4D5A3A8D1B15B0950006A7B3 /* Cederic.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4D5A3AA11B15B5B70006A7B3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D5A3AAA1B15B5B70006A7B3 /* CedericTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		4D5A3A831B15B05F0006A7B3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4D5A3A6C1B15B05F0006A7B3 /* Cederic */;
+			targetProxy = 4D5A3A821B15B05F0006A7B3 /* PBXContainerItemProxy */;
+		};
+		4D5A3AAD1B15B5B70006A7B3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4D5A3A6C1B15B05F0006A7B3 /* Cederic */;
+			targetProxy = 4D5A3AAC1B15B5B70006A7B3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		4D5A3A261B14DF660006A7B3 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4D5A3A271B14DF660006A7B3 /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
+		4D5A3A361B14DF660006A7B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = CedericMacExample/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		4D5A3A371B14DF660006A7B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = CedericMacExample/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		4D5A3A871B15B05F0006A7B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Cederic/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		4D5A3A881B15B05F0006A7B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = Cederic/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		4D5A3AAF1B15B5B70006A7B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = CedericTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		4D5A3AB01B15B5B70006A7B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = CedericTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		4D72238E1B0E778600DB1B6D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -282,78 +539,40 @@
 			};
 			name = Release;
 		};
-		4D7223911B0E778600DB1B6D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		4D7223921B0E778600DB1B6D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
-		4D7223A21B0F09CD00DB1B6D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = CedericTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		4D7223A31B0F09CD00DB1B6D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = CedericTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4D5A3A351B14DF660006A7B3 /* Build configuration list for PBXNativeTarget "CedericMacExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4D5A3A361B14DF660006A7B3 /* Debug */,
+				4D5A3A371B14DF660006A7B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4D5A3A861B15B05F0006A7B3 /* Build configuration list for PBXNativeTarget "Cederic" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4D5A3A871B15B05F0006A7B3 /* Debug */,
+				4D5A3A881B15B05F0006A7B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4D5A3AAE1B15B5B70006A7B3 /* Build configuration list for PBXNativeTarget "CedericTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4D5A3AAF1B15B5B70006A7B3 /* Debug */,
+				4D5A3AB01B15B5B70006A7B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		4D7223841B0E778600DB1B6D /* Build configuration list for PBXProject "Cederic" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4D72238E1B0E778600DB1B6D /* Debug */,
 				4D72238F1B0E778600DB1B6D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		4D7223901B0E778600DB1B6D /* Build configuration list for PBXNativeTarget "Cederic" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4D7223911B0E778600DB1B6D /* Debug */,
-				4D7223921B0E778600DB1B6D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		4D7223A11B0F09CD00DB1B6D /* Build configuration list for PBXNativeTarget "CedericTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4D7223A21B0F09CD00DB1B6D /* Debug */,
-				4D7223A31B0F09CD00DB1B6D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

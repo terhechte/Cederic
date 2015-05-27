@@ -210,7 +210,7 @@ public class Agent<T> {
     :param: initialState The internal state that the agent should store
     :param: validator A validation function which will be given the proposed new state and the old state. Returns bool success if the state transition is valid
     */
-    init(initialState: T) {
+    public init(_ initialState: T) {
         self.state = initialState
         self.watches = [:]
         self.actions = []
@@ -226,7 +226,7 @@ public class Agent<T> {
     The action will be processed on one of the pooled dispatch queues. If the actions
     are long running, use sendOff instead, which creates a new thread for the operation
     */
-    func send(fn: AgentAction) {
+    public func send(fn: AgentAction) {
         self.sendToManager(fn, tp: AgentSendType.Pooled)
     }
     
@@ -236,7 +236,7 @@ public class Agent<T> {
     Creates a new thread for the operation. If the operation is simple and short running
     consider using send instead, which processes on the existing internal dispatch queue pool
     */
-    func sendOff(fn: AgentAction) {
+    public func sendOff(fn: AgentAction) {
         self.sendToManager(fn, tp: AgentSendType.Solo)
     }
     
@@ -252,7 +252,7 @@ public class Agent<T> {
     2. The current agent
     3. The new state
     */
-    func addWatch(key: String, watch: AgentWatch) {
+    public func addWatch(key: String, watch: AgentWatch) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.watches[key] = watch
         })
@@ -263,7 +263,7 @@ public class Agent<T> {
     
     :param: key The identifier of the watch.
     */
-    func removeWatch(key: String) {
+    public func removeWatch(key: String) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.watches.removeValueForKey(key)
         })
