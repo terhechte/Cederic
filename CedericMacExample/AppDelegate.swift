@@ -7,15 +7,20 @@
 //
 
 import Cocoa
+import Cederic
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBOutlet weak var window: NSWindow!
-
+//    var ag = AgentRef<[Int]>([1, 2, 3])
+    var ag = AgentValue<[Int]>([1, 2, 3], validator: nil)
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
-        // Insert code here to initialize your application
+        ag.send({ v in
+            var y = v
+            y.append(4)
+            return y})
     }
 
     func applicationWillTerminate(aNotification: NSNotification) {

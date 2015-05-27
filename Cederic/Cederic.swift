@@ -173,12 +173,32 @@ enum AgentSendType {
 /** 
     Agents provide shared access to mutable state. They allow non-blocking (asynchronous as opposed to synchronous atoms) and independent change of individual locations. Agents are submitted functions which are stored in a mailbox and then executed in order. The agent itself has state, but no logic. The submitted functions modify the state. Using an Agent is more akin to operating on a data-structure than interacting with a service.
 
+    Types:
+
+    There are two types of Agents provided. One for value types, one for reference types.
+
+    - Value Types: This agent receives actions which modify the value in place and return an updated value.
+
+          ag.send({ (s: [Int]) -> [Int] in s.append(4); return s})
+          ag.send({ (s: Int) -> Int in return s * 20})
+    
+    - Reference Types: This agent receives an inout reference to the state and can modify it
+
+          ag.send({ (s: [Int]) -> Void in s.append(4); return})
+          ag.send({ (s: Int) -> Void in s +=4; return})
+
+    Value type Agents have the advantage of offering validators which allow you to valify any state transition.
+    You want to use a reference type agent if your state is a custom class, for example:
+
+          class example { var prop: Int = 0 }
+          ag.send({ (s: example) -> Void in s.prop += 5; return})
+
     Usage:
 
     1. Initialize the agent with some state:
-      let ag: Agent<[Int32]> = Agent([0, 1, 2, 3], nil)
+      let ag: AgentValue<[Int32]> = Agent([0, 1, 2, 3], nil)
     2. Update the state by sending it an action (The update will happen asynchronously at some point in the near future)
-      ag.send({ s in return s.append(4)})
+      ag.send({ s in s.append(4); return s})
     4. Retrieve the state of the agent via value:
       let v: [Int32] = ag.value
     5. Add a watch to be notified of any state changes
@@ -188,12 +208,14 @@ enum AgentSendType {
 
     - Use watches to get agent change notifications
     - Use sendOff instead of send if the operation will take a long amount of time
+    - Use validators to valify a state transition (only for AgentValue)
 */
 
-public class Agent<T> {
+public class Agent<T, U> {
     
-    typealias AgentAction = (inout T)->Void
-    typealias AgentWatch = (String, Agent<T>, T)->Void
+    typealias AgentAction = U//(inout T)->Void
+    typealias AgentWatch = (String, Agent<T, U>, T)->Void
+    typealias AgentValidator = (Agent<T, U>, T, T) -> Bool
     
     public var value: T {
         return state
@@ -202,6 +224,7 @@ public class Agent<T> {
     private var state: T
     private var watches: [String: AgentWatch]
     private var actions: [(AgentSendType, AgentAction)]
+    private var validator: AgentValidator?
     private var opidx: AgentQueueManager.AgentQueueOPID = ""
     
     /**
@@ -210,11 +233,12 @@ public class Agent<T> {
     :param: initialState The internal state that the agent should store
     :param: validator A validation function which will be given the proposed new state and the old state. Returns bool success if the state transition is valid
     */
-    public init(_ initialState: T) {
+    public init(_ initialState: T, validator: AgentValidator?) {
         self.state = initialState
         self.watches = [:]
         self.actions = []
         self.opidx = queueManager.add(self.process)
+        self.validator = validator
     }
     
     deinit {
@@ -251,6 +275,11 @@ public class Agent<T> {
     1. The watch identifier key
     2. The current agent
     3. The new state
+    
+    - For AgentRef agents, the watch will be called *after* the state transition
+    - For AgentValue agents, the watch will be called *before* the state transition (so that agent.value will
+        point to the old value for comparison's sake)
+    
     */
     public func addWatch(key: String, watch: AgentWatch) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
@@ -277,11 +306,7 @@ public class Agent<T> {
     }
     
     private func calculate(f: AgentAction) {
-        f(&self.state)
-        
-        for (key, watch) in self.watches {
-            watch(key, self, self.state)
-        }
+        assertionFailure("Please construct a AgentRef or a AgentValue.")
     }
     
     private func process() {
@@ -310,6 +335,60 @@ public class Agent<T> {
             })
         default: ()
         }
+    }
+}
+
+
+/**
+    Initialize An Agent for Reference types state
+
+    This means that any the actions are handed a inout reference to the state and can modify it at will.
+    This also effectively disables validators as the operation cannot
+    be undone.
+*/
+public class AgentRef<T> : Agent<T, (inout T)->Void> {
+    
+    public init(_ initialState: T) {
+        super.init(initialState, validator: nil)
+    }
+    
+    private override func calculate(f: AgentAction) {
+        // Calculate the state modifications
+        f(&self.state)
+        
+        // Notify the watches
+        for (key, watch) in self.watches {
+            watch(key, self, self.state)
+        }
+    }
+}
+
+public class AgentValue<T> : Agent<T, (T) ->T> {
+    
+    public override init(_ initialState: T, validator: AgentValidator?) {
+        super.init(initialState, validator: validator)
+    }
+    
+    private override func calculate(f: AgentAction) {
+        // Calculate the new state
+        var s = self.state
+        let sx = f(s)
+        
+        // If there is a validator, see if it validates
+        if let v = self.validator {
+            let r = v(self, sx, self.state)
+            if !r {
+                return
+            }
+        }
+        
+        // Notify the watches
+        for (key, watch) in self.watches {
+            watch(key, self, sx)
+        }
+        
+        // Apply the state
+        self.state = sx
     }
 }
 

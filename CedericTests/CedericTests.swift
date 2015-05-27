@@ -10,14 +10,14 @@ import Cocoa
 import Cederic
 import XCTest
 
-class CedericTests: XCTestCase {
+class CedericRefTests: XCTestCase {
     
-    var cederic: Agent<[[String: Int]]>?
+    var cederic: AgentRef<[[String: Int]]>?
     
     override func setUp() {
         super.setUp()
         var state = [["a": 1], ["b": 2], ["c": 3]]
-        self.cederic = Agent(state)
+        self.cederic = AgentRef(state)
     }
     
     override func tearDown() {
