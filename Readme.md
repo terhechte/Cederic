@@ -9,7 +9,7 @@ Agents provide shared access to mutable state. They allow non-blocking (asynchro
 > **TLDR** Agents wrap data to allow you non-blocking, thread-safe, asynchrounous access & modification
 
 #### How to use?
-1. Add Cederic.swift to your source base
+1. Add Cederic.swift to your project
 2. Create an Agent:
 `
 var ag = AgentVal<[Int]>([1, 2, 3], validator: nil)
@@ -33,7 +33,7 @@ println(ag.value)
 - Basic API implemented
 - Lacks Documentation
 - Lacks fancy example project
-- 27% CPU as a Release Build on Retina 13" (2012) with 50000 agents and (around) 1000 data updates
+- 27% CPU as a Release Build on Retina 13" (2012) with 50000 agents and (around) 1000 data updates per second
 - High memory consumption for many agents (60 mb vs. 4.5 mb for a similar non-asynchronous simple loop over such a structure)
 - 10MB memory growth (from 50mb to 60mb) after ~4500000 data updates over the course of 2 hours (50.000 agents) 
 
