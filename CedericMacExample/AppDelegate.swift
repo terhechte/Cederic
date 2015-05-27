@@ -13,8 +13,7 @@ import Cederic
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBOutlet weak var window: NSWindow!
-//    var ag = AgentRef<[Int]>([1, 2, 3])
-    var ag = AgentValue<[Int]>([1, 2, 3], validator: nil)
+    var ag = AgentVal<[Int]>([1, 2, 3], validator: nil)
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         ag.send({ v in
