@@ -250,6 +250,8 @@ public class Agent<T, U> {
     Add an action to the internal mailbox to be applied to the current state.
     The action will be processed on one of the pooled dispatch queues. If the actions
     are long running, use sendOff instead, which creates a new thread for the operation
+    
+    Your code will be executed on one of the pooled dispatch queues.
     */
     public func send(fn: AgentAction) {
         self.sendToManager(fn, tp: AgentSendType.Pooled)
@@ -260,6 +262,8 @@ public class Agent<T, U> {
     Add an action to the internal mailbox to be applied to the current state.
     Creates a new thread for the operation. If the operation is simple and short running
     consider using send instead, which processes on the existing internal dispatch queue pool
+    
+    Your code will be executed on a serial dispatch queue specifically created for executing your code.
     */
     public func sendOff(fn: AgentAction) {
         self.sendToManager(fn, tp: AgentSendType.Solo)
@@ -280,6 +284,10 @@ public class Agent<T, U> {
     - For AgentRef agents, the watch will be called *after* the state transition
     - For AgentValue agents, the watch will be called *before* the state transition (so that agent.value will
         point to the old value for comparison's sake)
+    
+    The watch code will be executed on the dispatch queue on which the action is performed,
+    either one from the agent dispatch queue pool - in case of send - or on a specially created one
+    - in case of sendOff.
     
     */
     public func addWatch(key: String, watch: AgentWatch) {

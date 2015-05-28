@@ -44,6 +44,7 @@ being used from multiple threads.
 
 #### TODO
 - [ ] define operators for easy equailty, changing and comparison
+- [ ] allow to define a thread for watch registration
 - [ ] Implement NSKeyValueObserving (would require subclassing from NSObject)
 
 ##### Version 0.0.4
