@@ -179,7 +179,7 @@ enum AgentSendType {
 
     - Value Types: This agent receives actions which modify the value in place and return an updated value.
 
-          ag.send({ (s: [Int]) -> [Int] in var sx =s; sx.append(4); return sx})
+          ag.send({ (s: [Int]) -> [Int] in var return s + [4]})
           ag.send({ (s: Int) -> Int in return s * 20})
     
     - Reference Types: This agent receives an inout reference to the state and can modify it
@@ -198,7 +198,7 @@ enum AgentSendType {
     1. Initialize the agent with some state:
       let ag: AgentValue<[Int32]> = Agent([0, 1, 2, 3], nil)
     2. Update the state by sending it an action (The update will happen asynchronously at some point in the near future)
-      ag.send({ s in s.append(4); return s})
+      ag.send({ s in return s + [4]})
     4. Retrieve the state of the agent via value:
       let v: [Int32] = ag.value
     5. Add a watch to be notified of any state changes

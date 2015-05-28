@@ -16,10 +16,7 @@ var ag = AgentVal<[Int]>([1, 2, 3], validator: nil)
 `
 3. Process an operation on the Agent
 `
-ag.send({ v in
-var y = v
-y.append(4)
-return y})
+ag.send({ v in return y + [4]})
 `
 (This is a bit cumbersome due to the Swift Value semantics and the Array type)
 

@@ -114,27 +114,21 @@ class CedericValTests: XCTestCase {
     func testAddState() {
         var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
         self.testStateTransition(state, modifier: { (v) -> [[String: Int]] in
-            var s = v
-            s.append(["d": 4])
-            return s
+            return v + [["d": 4]]
         })
     }
     
     func testRemoveState() {
         var state = [["a": 1], ["b": 2]]
         self.testStateTransition(state, modifier: { (v) -> [[String: Int]] in
-            var s = v
-            s.removeLast()
-            return s
+            return Array(v[0..<(v.count-1)])
         })
     }
     
     func testChangeState() {
         var state = [["a": 0], ["b": 2], ["c": 3]]
         self.testStateTransition(state, modifier: { (v) -> [[String: Int]] in
-            var s = v
-            s.replaceRange(0..<1, with: [["a": 0]])
-            return s
+            return Array([["a": 0]] + v[1..<v.count])
         })
     }
     
@@ -240,6 +234,8 @@ class CedericRefTests: XCTestCase {
         })
     }
     
+    // This test currently fails every third or so test. It seems to be some sort
+    // of threading issue, I'm still looking into it.
     func testRemoveState() {
         var state = [["a": 1], ["b": 2]]
         self.testStateTransition(state, modifier: { (v) -> Void in
@@ -297,6 +293,64 @@ class CedericRefTests: XCTestCase {
                 sleep(2)
                 XCTAssertFalse(watchTriggered, "Watch wasn't removed")
             })
+        }
+    }
+    
+    /** The following two tests are not directly Cederic related, but instead measure the performance
+        difference of functional Array modification versus non-functional array modification. This is
+        a good guidance as using functional modification on arrays looks much better, however seems to 
+        perform much worse. Consider:
+        Replacement: Functional: 1.153 sec, Mutating: 0.527 sec
+        Appending: Functional: 0.057 sec, Mutating: 0.004 sec
+    */
+    func testArrayFuncReplace() {
+        // Measure Replacement
+        self.measureBlock() {
+            var cx = 0
+            for i in 0..<100000 {
+                let ix = [i, i + 1, i + 2, i + 3, i + 4, i + 5]
+                // we want to measure this
+                let ix2 = [5 + i * 2] + Array(ix[1..<ix.count])
+                
+                let s = ix2.reduce(0, combine: (+))
+                cx += s
+            }
+        }
+        
+    }
+    
+    func testArrayFuncAppend() {
+        // Measure Appending
+        self.measureBlock { () -> Void in
+            var arx: [Int] = []
+            for i in 0..<10000 {
+                arx = arx + [i]
+            }
+        }
+    }
+    
+    func testArrayNFuncReplace() {
+        // Measure Replacement
+        self.measureBlock() {
+            var cx = 0
+            for i in 0..<100000 {
+                var ix = [i, i + 1, i + 2, i + 3, i + 4, i + 5]
+                // We want to measure this
+                ix.replaceRange(0..<1, with: [5 + i * 2])
+                let s = ix.reduce(0, combine: (+))
+                cx += s
+            }
+        }
+        
+    }
+    
+    func testArrayNFuncAppend() {
+        // Measure Appending
+        self.measureBlock { () -> Void in
+            var arx:[Int] = []
+            for i in 0..<10000 {
+                arx.append(i)
+            }
         }
     }
     
