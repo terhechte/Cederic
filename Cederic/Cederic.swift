@@ -83,7 +83,7 @@ private class AgentQueueManager {
     // will be processed
     lazy var agentQueuePool: [dispatch_queue_t] = {
         var p: [dispatch_queue_t] = []
-        for i in 0...kAmountOfPooledQueues {
+        for i in 0..<kAmountOfPooledQueues {
             p.append(dispatch_queue_create("com.stylemac.AgentPoolQueue-\(i)", DISPATCH_QUEUE_SERIAL))
         }
         return p
@@ -102,7 +102,7 @@ private class AgentQueueManager {
     
     /** Randomly select one of the available pool queues and return it */
     var anyPoolQueue: dispatch_queue_t {
-        let pos = Int(arc4random_uniform(UInt32(kAmountOfPooledQueues) + UInt32(1)))
+        let pos = Int(arc4random_uniform(UInt32(kAmountOfPooledQueues)))
         return agentQueuePool[pos]
     }
     
@@ -274,6 +274,16 @@ public class Agent<T, U> {
     */
     public func sendOff(fn: AgentAction) {
         self.sendToManager(fn, tp: AgentSendType.Solo)
+    }
+    
+    /**
+    Cancel any pending actions which have not been processed yet.
+    This will remove all queued up actions except for those which are currently processing
+    */
+    public func cancelAll() {
+        dispatch_async(queueManager.agentBlockQueue, { () -> Void in
+            self.actions.removeAll(keepCapacity: true)
+        })
     }
     
     /**

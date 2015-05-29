@@ -43,6 +43,8 @@ actions and modiy the state. Through clever GCD machinery, all this is thread sa
 being used from multiple threads.
 
 #### TODO
+- [ ] if actions are generated too fast, operations queue up, and it can take quite long until all operations have been processed
+- [ ] cancelling agent actions currently doesn't remove all the queued up dispatch actions. try to find a way to do that.
 - [ ] define operators for easy equailty, changing and comparison
 - [ ] allow to define a thread for watch registration
 - [ ] Implement NSKeyValueObserving (would require subclassing from NSObject)
