@@ -9,7 +9,10 @@
 import Foundation
 import Dispatch
 
-let kAmountOfPooledQueues = 4
+// FIXME: Having multiple pooled queues without agent barriers fails hard time
+// because two serial queues can perform two agent actions at the same time, right?
+// SOLUTION: Agents always need to be connected to one serial queue from the start
+let kAmountOfPooledQueues = 1
 let kKqueueUserIdentifier = UInt(0x6c0176cf) // a random number
 
 /** 
@@ -45,7 +48,7 @@ private func postToQueue(queue: Int32, value: UnsafeMutablePointer<Void>) -> Int
 
     *Warning*: Always test the pointer against nil before unpacking the value pointed to with .memory
 */
-private func readFromQeue(queue: Int32) -> UnsafeMutablePointer<Void> {
+private func readFromQueue(queue: Int32) -> UnsafeMutablePointer<Void> {
     var evlist = UnsafeMutablePointer<kevent>.alloc(1)
     let flags = EV_ADD | EV_CLEAR | EV_ENABLE
     var kev: kevent = kevent(ident: UInt(kKqueueUserIdentifier), filter: Int16(EVFILT_USER), flags: UInt16(flags), fflags: UInt32(0), data: Int(0), udata: nil)
@@ -68,7 +71,10 @@ private func readFromQeue(queue: Int32) -> UnsafeMutablePointer<Void> {
 private class AgentQueueManager {
     
     // This queue manages the process operations of all agents. It syncs the adding, removal, and calling of them.
-    lazy var agentProcessQueue = dispatch_queue_create("com.stylemac.agentProcessQueue", DISPATCH_QUEUE_CONCURRENT)
+//    lazy var agentProcessQueue = dispatch_queue_create("com.stylemac.agentProcessQueue", DISPATCH_QUEUE_CONCURRENT)
+    lazy var agentProcessQueue = dispatch_queue_create("com.stylemac.agentProcessQueue", DISPATCH_QUEUE_SERIAL)
+    
+    lazy var agentProcessConcurrentQueue = dispatch_queue_create("com.stylemac.agentProcessConcurrentQueue", DISPATCH_QUEUE_CONCURRENT)
     
     // This queue manages the adding of new actions to agents. It syncs the adding, removal, and calling of them.
     lazy var agentBlockQueue = dispatch_queue_create("com.stylemac.agentBlockQueue", DISPATCH_QUEUE_SERIAL)
@@ -132,9 +138,10 @@ private class AgentQueueManager {
     Runs on the system background queue, the processing happens on the agentProcessQueue, and from there on the pool queue
     */
     func perform() {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
+        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
+        dispatch_async(self.agentProcessConcurrentQueue, { () -> Void in
             while (true) {
-                let data = readFromQeue(self.kQueue)
+                let data = readFromQueue(self.kQueue)
                 if data != nil {
                     let dataString = UnsafeMutablePointer<String>(data)
                     let sx = dataString.memory
@@ -319,12 +326,13 @@ public class Agent<T, U> {
     }
     
     private func process() {
-        var fn: (AgentSendType, AgentAction)?
         
-        // FIXME: Loop over actions here? To process everything we have?
+        // create a copy
+        var actionsCopy: [(AgentSendType, AgentAction)] = self.actions
+        
         if self.actions.count > 0 {
             dispatch_sync(queueManager.agentBlockQueue, { () -> Void in
-                fn = self.actions.removeAtIndex(0)
+                self.actions.removeAll(keepCapacity: true)
             })
         } else {
             return;
@@ -343,15 +351,17 @@ public class Agent<T, U> {
             })
         }
         
-        switch fn {
-        case .Some(.Pooled, let f):
-            processOnQueue(queueManager.anyPoolQueue, f)
-        case .Some(.Solo, let f):
-            // Create and destroy a queue just for this
-            let uuid = NSUUID().UUIDString
-            let ourQueue = dispatch_queue_create(uuid, nil)
-            processOnQueue(ourQueue, f)
-        default: ()
+        for fn in actionsCopy {
+            switch fn {
+            case (.Pooled, let f):
+                processOnQueue(queueManager.anyPoolQueue, f)
+            case (.Solo, let f):
+                // Create and destroy a queue just for this
+                let uuid = NSUUID().UUIDString
+                let ourQueue = dispatch_queue_create(uuid, nil)
+                processOnQueue(ourQueue, f)
+            default: ()
+            }
         }
     }
 }
