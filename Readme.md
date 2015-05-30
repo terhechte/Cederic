@@ -46,8 +46,7 @@ being used from multiple threads.
 - [ ] if actions are generated too fast, operations queue up, and it can take quite long until all operations have been processed
 - [ ] cancelling agent actions currently doesn't remove all the queued up dispatch actions. try to find a way to do that.
 - [ ] define operators for easy equailty, changing and comparison
-- [ ] allow to define a thread for watch registration
-- [ ] Implement NSKeyValueObserving (would require subclassing from NSObject)
+- [ ] allow to define a thread for watch registration to return on
 
 ##### Version 0.0.4
 - Removed the Kjue library in order to simplify the code

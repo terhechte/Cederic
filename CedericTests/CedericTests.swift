@@ -11,16 +11,16 @@ import Cederic
 import XCTest
 
 class CedericValTests: XCTestCase {
-    var cederic: AgentVal<[[String: Int]]>?
-    var cedericValidator: AgentVal<Int>?
+    var cederic: Agent<[[String: Int]]>?
+    var cedericValidator: Agent<Int>?
     
     override func setUp() {
         super.setUp()
         var state = [["a": 1], ["b": 2], ["c": 3]]
-        self.cederic = AgentVal(initialState: state, validator: nil)
+        self.cederic = Agent(state, validator: nil)
         
         // Create an Agent with a validator that ignores values <= 5
-        self.cedericValidator = AgentVal(initialState: 10, validator: {(agent, old, new) -> Bool in
+        self.cedericValidator = Agent(10, validator: {(agent, old, new) -> Bool in
             if new <= 5 {
                 return false
             } else {
@@ -46,7 +46,7 @@ class CedericValTests: XCTestCase {
         })
     }
     
-    func testStateTransition(newState: [[String: Int]], modifier: ([[String: Int]])->[[String: Int]]) {
+    func testStateTransition(newState: [[String: Int]], modifier: (inout [[String: Int]])->[[String: Int]]) {
         if let c = self.cederic {
             let readyExpectation = expectationWithDescription("ready")
             
@@ -72,7 +72,7 @@ class CedericValTests: XCTestCase {
             var newState = 10
             let readyExpectation = expectationWithDescription("ready")
             
-            c.send({(s:Int)->Int in return 1})
+            c.send({(inout s:Int)->Int in return 1})
             
             self.valifyExpect(readyExpectation, bx: { () -> Bool in
                 if c.value == newState {
@@ -94,7 +94,7 @@ class CedericValTests: XCTestCase {
             var newState = 50
             let readyExpectation = expectationWithDescription("ready")
             
-            c.send({(s:Int)->Int in return 50})
+            c.send({(inout s:Int)->Int in return 50})
             
             self.valifyExpect(readyExpectation, bx: { () -> Bool in
                 if c.value == newState {
@@ -113,21 +113,21 @@ class CedericValTests: XCTestCase {
     
     func testAddState() {
         var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
-        self.testStateTransition(state, modifier: { (v) -> [[String: Int]] in
+        self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
             return v + [["d": 4]]
         })
     }
     
     func testRemoveState() {
         var state = [["a": 1], ["b": 2]]
-        self.testStateTransition(state, modifier: { (v) -> [[String: Int]] in
+        self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
             return Array(v[0..<(v.count-1)])
         })
     }
     
     func testChangeState() {
         var state = [["a": 0], ["b": 2], ["c": 3]]
-        self.testStateTransition(state, modifier: { (v) -> [[String: Int]] in
+        self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
             return Array([["a": 0]] + v[1..<v.count])
         })
     }
@@ -206,7 +206,7 @@ class CedericRefTests: XCTestCase {
         })
     }
     
-    func testStateTransition(newState: [[String: Int]], modifier: (inout [[String: Int]])->Void) {
+    func testStateTransition(newState: [[String: Int]], modifier: (inout [[String: Int]])->[[String: Int]]) {
         if let c = self.cederic {
             let readyExpectation = expectationWithDescription("ready")
             
@@ -228,27 +228,25 @@ class CedericRefTests: XCTestCase {
     
     func testAddState() {
         var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
-        self.testStateTransition(state, modifier: { (v) -> Void in
+        self.testStateTransition(state, modifier: { (v) -> [[String: Int]] in
             v.append(["d": 4])
-            return
+            return v
         })
     }
     
-    // This test currently fails every third or so test. It seems to be some sort
-    // of threading issue, I'm still looking into it.
     func testRemoveState() {
         var state = [["a": 1], ["b": 2]]
-        self.testStateTransition(state, modifier: { (v) -> Void in
+        self.testStateTransition(state, modifier: { v in
             v.removeLast()
-            return
+            return v
         })
     }
     
     func testChangeState() {
         var state = [["a": 0], ["b": 2], ["c": 3]]
-        self.testStateTransition(state, modifier: { (v) -> Void in
+        self.testStateTransition(state, modifier: { v in
             v.replaceRange(0..<1, with: [["a": 0]])
-            return
+            return v
         })
     }
     
@@ -263,9 +261,9 @@ class CedericRefTests: XCTestCase {
                 }
             })
             
-            c.send({ (v) -> Void in
+            c.send({ v in
                 v.append(["d": 4])
-                return
+                return v
             })
             
             waitForExpectationsWithTimeout(5, handler: { (e) -> Void in
@@ -284,9 +282,9 @@ class CedericRefTests: XCTestCase {
             })
             c.removeWatch("w1")
             
-            c.send({ (v) -> Void in
+            c.send({ v in
                 v.append(["d": 4])
-                return
+                return v
             })
             
             dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), { () -> Void in
@@ -360,9 +358,9 @@ class CedericRefTests: XCTestCase {
         self.measureBlock() {
             
             let maxagents = 50000
-            var agents: [AgentVal<Int>] = []
+            var agents: [Agent<Int>] = []
             for i in 1...maxagents {
-                agents.append(AgentVal(initialState: 5, validator: nil))
+                agents.append(Agent(5, validator: nil))
             }
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), { () -> Void in
@@ -370,7 +368,9 @@ class CedericRefTests: XCTestCase {
                 while (s > 0) {
                     usleep(200)
                     let pos = Int(arc4random_uniform(UInt32(maxagents)))
-                    agents[pos].send({ n in return n + 1})
+                    agents[pos].send({ (inout v: Int) -> Int in
+                        return v + 1
+                    })
                     s -= 1
                 }
             })

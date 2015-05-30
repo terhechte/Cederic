@@ -218,11 +218,11 @@ enum AgentSendType {
     - Use validators to valify a state transition (only for AgentValue)
 */
 
-public class Agent<T, U> {
+public class Agent<T> {
     
-    typealias AgentAction = U//(inout T)->Void
-    typealias AgentWatch = (String, Agent<T, U>, T)->Void
-    typealias AgentValidator = (Agent<T, U>, T, T) -> Bool
+    typealias AgentAction = (inout T)->T
+    typealias AgentWatch = (String, Agent<T>, T)->Void
+    typealias AgentValidator = (Agent<T>, oldstate: T, newstate: T) -> Bool
     
     public var value: T {
         return state
@@ -233,7 +233,6 @@ public class Agent<T, U> {
     private var actions: [(AgentSendType, AgentAction)]
     private var validator: AgentValidator?
     private var opidx: AgentQueueManager.AgentQueueOPID = ""
-    private var fu: U? = nil
     
     /**
     Initialize an Agent.
@@ -325,14 +324,33 @@ public class Agent<T, U> {
     }
     
     private func sendToManager(fn: AgentAction, tp: AgentSendType) {
+        
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.actions.append((tp, fn))
             postToQueue(queueManager.kQueue, &self.opidx)
         })
     }
     
-    private func calculate() {
-        assertionFailure("Please construct a AgentRef or a AgentValue.")
+    private func calculate(f: AgentAction) {
+        // Calculate the new state
+        var s = self.state
+        let sx = f(&s)
+        
+        // If there is a validator, see if it validates
+        if let v = self.validator {
+            let r = v(self, oldstate: self.state, newstate: sx)
+            if !r {
+                return
+            }
+        }
+        
+        // Notify the watches
+        for (key, watch) in self.watches {
+            watch(key, self, sx)
+        }
+        
+        // Apply the state
+        self.state = sx
     }
     
     private func process() {
@@ -348,16 +366,9 @@ public class Agent<T, U> {
             return;
         }
         
-        func processOnQueue(q: dispatch_queue_t, f: U) {
+        func processOnQueue(q: dispatch_queue_t, f: AgentAction) {
             dispatch_async(q, { () -> Void in
-                // FIXME: having f be a parameter of calulate leads to EXC_BAD_ACCESS because the
-                // func gets deallocated along the way. This seems to be because f is of unknown type U.
-                // I could not find a better way of solving this except for storing f temporarily as a
-                // object property. This should be ok, since operations are performed in Serial,
-                // never overwriting the required action.
-                self.fu = f
-                self.calculate()
-                self.fu = nil
+                self.calculate(f)
             })
         }
         
@@ -384,60 +395,20 @@ public class Agent<T, U> {
     This also effectively disables validators as the operation cannot
     be undone.
 */
-public class AgentRef<T> : Agent<T, (inout T)->Void> {
+public class AgentRef<T> : Agent<T> {
     
     public init(_ initialState: T) {
         super.init(initialState, validator: nil)
     }
     
-    private override func calculate() {
+    private override func calculate(f: AgentAction) {
         // Calculate the state modifications
-        if let f = self.fu {
             f(&self.state)
             
             // Notify the watches
             for (key, watch) in self.watches {
                 watch(key, self, self.state)
             }
-        }
-    }
-}
-
-/**
-    Initialize An Agent for Value types state
-
-    This means that any the actions are handed the current state as a value type.
-    They're expected to return an updated version of the state.
-*/
-public class AgentVal<T> : Agent<T, (T) ->T> {
-    
-    public init(initialState: T, validator: AgentValidator?) {
-        super.init(initialState, validator: validator)
-    }
-    
-    //private override func calculate(f: AgentAction) {
-    private override func calculate() {
-        if let f = self.fu {
-            // Calculate the new state
-            var s = self.state
-            let sx = f(s)
-            
-            // If there is a validator, see if it validates
-            if let v = self.validator {
-                let r = v(self, sx, self.state)
-                if !r {
-                    return
-                }
-            }
-            
-            // Notify the watches
-            for (key, watch) in self.watches {
-                watch(key, self, sx)
-            }
-            
-            // Apply the state
-            self.state = sx
-        }
     }
 }
 
