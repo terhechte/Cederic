@@ -68,20 +68,19 @@ private func readFromQueue(queue: Int32) -> UnsafeMutablePointer<Void> {
 private class AgentQueueManager {
     
     // This queue manages the process operations of all agents. It syncs the adding, removal, and calling of them.
-//    lazy var agentProcessQueue = dispatch_queue_create("com.stylemac.agentProcessQueue", DISPATCH_QUEUE_CONCURRENT)
-    lazy var agentProcessQueue = dispatch_queue_create("com.stylemac.agentProcessQueue", DISPATCH_QUEUE_SERIAL)
+    lazy var agentProcessQueue = dispatch_queue_create("com.cederic.agentProcessQueue", DISPATCH_QUEUE_SERIAL)
     
-    lazy var agentProcessConcurrentQueue = dispatch_queue_create("com.stylemac.agentProcessConcurrentQueue", DISPATCH_QUEUE_CONCURRENT)
+    lazy var agentProcessConcurrentQueue = dispatch_queue_create("com.cederic.agentProcessConcurrentQueue", DISPATCH_QUEUE_CONCURRENT)
     
     // This queue manages the adding of new actions to agents. It syncs the adding, removal, and calling of them.
-    lazy var agentBlockQueue = dispatch_queue_create("com.stylemac.agentBlockQueue", DISPATCH_QUEUE_SERIAL)
+    lazy var agentBlockQueue = dispatch_queue_create("com.cederic.agentBlockQueue", DISPATCH_QUEUE_SERIAL)
     
     // This queue manages the actual calculation of the process actions. This is where the user-defined action block
     // will be processed
     lazy var agentQueuePool: [dispatch_queue_t] = {
         var p: [dispatch_queue_t] = []
         for i in 0..<kAmountOfPooledQueues {
-            p.append(dispatch_queue_create("com.stylemac.AgentPoolQueue-\(i)", DISPATCH_QUEUE_SERIAL))
+            p.append(dispatch_queue_create("com.cederic.AgentPoolQueue-\(i)", DISPATCH_QUEUE_SERIAL))
         }
         return p
     }()
