@@ -9,7 +9,7 @@
 import Foundation
 import Dispatch
 
-let kAmountOfPooledQueues = 1
+let kAmountOfPooledQueues = 4
 let kKqueueUserIdentifier = UInt(0x6c0176cf) // a random number
 
 /** 
@@ -87,6 +87,7 @@ private class AgentQueueManager {
     
     var operations: [String: ()->()] = [:]
     var kQueue: Int32
+    var lastPoolQueue = 0
     
     typealias AgentQueueOPID = String
     
@@ -98,8 +99,11 @@ private class AgentQueueManager {
     
     /** Randomly select one of the available pool queues and return it */
     var anyPoolQueue: dispatch_queue_t {
-        let pos = Int(arc4random_uniform(UInt32(kAmountOfPooledQueues)))
-        return agentQueuePool[pos]
+        if lastPoolQueue > kAmountOfPooledQueues {
+            lastPoolQueue = 0
+        }
+        // FIXME: use a lock for this
+        return agentQueuePool[lastPoolQueue++]
     }
     
     
@@ -182,19 +186,19 @@ enum AgentSendType {
 
     - Value Types: This agent receives actions which modify the value in place and return an updated value.
 
-          ag.send({ (s: [Int]) -> [Int] in var return s + [4]})
-          ag.send({ (s: Int) -> Int in return s * 20})
+          ag.send({ (inout s: [Int]) -> [Int] in var return s + [4]})
+          ag.send({ (inout s: Int) -> Int in return s * 20})
     
     - Reference Types: This agent receives an inout reference to the state and can modify it
 
-          ag.send({ (s: [Int]) -> Void in s.append(4); return})
-          ag.send({ (s: Int) -> Void in s +=4; return})
+          ag.send({ (inout s: [Int]) -> Void in s.append(4); return s})
+          ag.send({ (inout s: Int) -> Void in s +=4; return s})
 
     Value type Agents have the advantage of offering validators which allow you to valify any state transition.
     You want to use a reference type agent if your state is a custom class, for example:
 
           class example { var prop: Int = 0 }
-          ag.send({ (s: example) -> Void in s.prop += 5; return})
+          ag.send({ (inout s: example) -> Void in s.prop += 5; return})
 
     Usage:
 
@@ -216,19 +220,43 @@ enum AgentSendType {
 
 public class Agent<T> {
     
+    /// Type definition for an action to be applied to the state
     typealias AgentAction = (inout T)->T
+    
+    /// Type definition for a watch
     typealias AgentWatch = (String, Agent<T>, T)->Void
+    
+    /// Type definition for a validator
     typealias AgentValidator = (Agent<T>, oldstate: T, newstate: T) -> Bool
     
+    /// Easy way for the user to access the agent's state
     public var value: T {
         return state
     }
     
+    /// The agent's state
     private var state: T
-    private var watches: [String: AgentWatch]
+    
+    /// Outstanding actions to be applied to the agent's state
     private var actions: [(AgentSendType, AgentAction)]
+    
+    /// Any watches that the user may have defined
+    private var watches: [String: AgentWatch]
+    
+    /// The validator, if the user assigned one
     private var validator: AgentValidator?
+    
+    /// The agent manager identifier of this agent
     private var opidx: AgentQueueManager.AgentQueueOPID = ""
+    
+    /// The dispatch queue that this agent uses
+    private var dispatchGroup: dispatch_group_t
+    
+    /// Upon creation, this is the queue we get assigned from the agent manager
+    private var poolQueue: dispatch_queue_t
+    
+    /// When an agent cancels it's actions, this is set to true until all queue operations are cleared
+    private var isCancelled = false
     
     /**
     Initialize an Agent.
@@ -240,6 +268,8 @@ public class Agent<T> {
         self.state = initialState
         self.watches = [:]
         self.actions = []
+        self.dispatchGroup = dispatch_group_create()
+        self.poolQueue = queueManager.anyPoolQueue
         self.opidx = queueManager.add(self.process)
         self.validator = validator
     }
@@ -274,10 +304,35 @@ public class Agent<T> {
     /**
     Cancel any pending actions which have not been processed yet.
     This will remove all queued up actions except for those which are currently processing
+    
+    *Important:*
+    
+    Any new send/sendOff actions send after cancel and before the completion block triggers
+    may or may not be executed. You should always wait for the completion to finish. Before sending new actions.
+    
+    :param: completion A completion block that will be executed once all outstanding actions have been cleared
     */
-    public func cancelAll() {
+    public func cancelAll(completion: dispatch_block_t? = nil) {
+        // If we're already cancelling, ignore this
+        if self.isCancelled {
+            return
+        }
+        
+        self.isCancelled = true
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.actions.removeAll(keepCapacity: true)
+        })
+        
+        // Track when the dispatch group is empty
+        // If the group is empty, the notification block object is submitted immediately.
+        dispatch_group_notify(self.dispatchGroup,
+            dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),
+            { () -> Void in
+                // This allows us to reset the cancel flag
+                self.isCancelled = false
+                if let c = completion {
+                    c()
+                }
         })
     }
     
@@ -320,7 +375,6 @@ public class Agent<T> {
     }
     
     private func sendToManager(fn: AgentAction, tp: AgentSendType) {
-        
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.actions.append((tp, fn))
             postToQueue(queueManager.kQueue, &self.opidx)
@@ -349,35 +403,55 @@ public class Agent<T> {
         self.state = sx
     }
     
+    // Internal accounting state to get a rough measure of outstanding tasks, mostly for
+    // monitoring purposes
+    private var processOnQueueCount = 0
+    
     private func process() {
         
         // create a copy
-        var actionsCopy: [(AgentSendType, AgentAction)] = self.actions
+        var actionsCopy: [(AgentSendType, AgentAction)]? = nil
         
-        if self.actions.count > 0 {
-            dispatch_sync(queueManager.agentBlockQueue, { () -> Void in
+        dispatch_sync(queueManager.agentBlockQueue, { () -> Void in
+            actionsCopy = self.actions
+            
+            if self.actions.count > 0 {
                 self.actions.removeAll(keepCapacity: true)
-            })
-        } else {
-            return;
-        }
+            } else {
+                return;
+            }
+        })
         
         func processOnQueue(q: dispatch_queue_t, f: AgentAction) {
-            dispatch_async(q, { () -> Void in
-                self.calculate(f)
-            })
+            self.processOnQueueCount += 1
+            
+            dispatch_group_enter(self.dispatchGroup)
+            dispatch_group_async(self.dispatchGroup,
+                q) { () -> Void in
+                    
+                    // Don't perform any further processing if the operations are cancelled
+                    if !self.isCancelled {
+                        self.calculate(f)
+                        self.processOnQueueCount -= 1
+                    }
+                    
+                    dispatch_group_leave(self.dispatchGroup)
+            }
         }
         
-        for fn in actionsCopy {
-            switch fn {
-            case (.Pooled, let f):
-                processOnQueue(queueManager.anyPoolQueue, f)
-            case (.Solo, let f):
-                // Create and destroy a queue just for this
-                let uuid = NSUUID().UUIDString
-                let ourQueue = dispatch_queue_create(uuid, nil)
-                processOnQueue(ourQueue, f)
-            default: ()
+        if let act = actionsCopy  {
+            for fn in act {
+                switch fn {
+                case (.Pooled, let f):
+                    processOnQueue(self.poolQueue, f)
+                case (.Solo, let f):
+                    // Create and destroy a queue just for this
+                    let uuid = NSUUID().UUIDString
+                    let ourQueue = dispatch_queue_create(uuid, nil)
+                    dispatch_group_wait(self.dispatchGroup, DISPATCH_TIME_FOREVER)
+                    processOnQueue(ourQueue, f)
+                default: ()
+                }
             }
         }
     }

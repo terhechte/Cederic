@@ -30,6 +30,8 @@ class CalcOperation: NSOperation {
                 return
             }
             
+            let randomValue = arc4random_uniform(100)
+            
             // Tell the Segmented Control, that we're active
             self.controlAgent.send({(inout i:NSSegmentedControl) in
                 
@@ -37,6 +39,7 @@ class CalcOperation: NSOperation {
                 // run this code synchronous on the main thread
                 dispatch_sync(dispatch_get_main_queue(), { () -> Void in
                     i.selectedSegment = self.index
+                    i.setLabel("OP \(self.index) (\(randomValue))", forSegment: self.index)
                     return
                 })
                 return i
@@ -50,7 +53,6 @@ class CalcOperation: NSOperation {
             }
             
             // Calculate a random string
-            let randomValue = arc4random_uniform(100)
             let string = "Operation \(self.index) - Value: \(counter)"
             counter += 1
             
@@ -92,8 +94,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBOutlet weak var segmentedControl: NSSegmentedControl!
     
-    var engineOn: Bool = false
-    
     // Create the queue that holds our NSOperations
     var queue: NSOperationQueue = {
         var q = NSOperationQueue()
@@ -112,8 +112,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // the content in the agent has changed. In order to remedy this, we copy the
     // contents of the agent whenever it changed, so that NSTableView always processes
     // on a stale copy.
-    // A better solution is using a NSArrayController, however that won't work on iOS
-    // so I've kept it out
     var listContentCopy: [String] = []
     
     // Create the agent that holds the NSSegmentedControl
@@ -121,9 +119,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         
-        // Add a watch to the agent that will reload the table view once soemthing changes
+        // Add a watch to the agent that will reload the table view once something changes
         self.listAgent.addWatch("mainWatch", watch: { (key, agent, state) -> Void in
-//            if !self.engineOn { return }
             
             // assign any state changes to our table-view-controller
             dispatch_sync(dispatch_get_main_queue(), { () -> Void in
@@ -138,30 +135,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     /// Create 5 CalcOperations
     func turnOnEngine() {
-        self.engineOn = true
-        
         for i in 0..<5 {
             let anOperation = CalcOperation(listAgent: self.listAgent, controlAgent: self.controlAgent!, index: i)
             self.queue.addOperation(anOperation)
         }
     }
     
+    /// Turn off calculations and clear anything remaining
     func turnOffEngine() {
-        self.engineOn = false
-        
         self.queue.cancelAllOperations()
         
-        self.listAgent.cancelAll()
-        self.controlAgent!.cancelAll()
+        // We cancel any outstanding actions
+        // And after that, clear the list
+        self.listAgent.cancelAll { () -> Void in
+            self.listAgent.send({(i) in
+                // just "return []" fails as the type checker identifies [] as a NSArray *sigh*
+                let s: [String] = []
+                return s
+            })
+        }
         
-        self.listAgent.send({(i) in
-            // just "return []" fails as the type checker identifies [] as a NSArray *sigh*
-            let s: [String] = []
-            return s
-        })
-        
+        // Also cancel the control agent
+        self.controlAgent.map {$0.cancelAll}
     }
-    
     
     @IBAction func startStop(sender: NSButton) {
         if sender.state == NSOffState {
@@ -171,11 +167,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func applicationWillTerminate(aNotification: NSNotification) {
-        // Insert code here to tear down your application
-    }
-    
-    
     func numberOfRowsInTableView(tableView: NSTableView) -> Int {
         return listContentCopy.count
     }

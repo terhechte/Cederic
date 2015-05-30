@@ -47,10 +47,15 @@ being used from multiple threads.
 - [ ] cancelling agent actions currently doesn't remove all the queued up dispatch actions. try to find a way to do that.
 - [ ] define operators for easy equailty, changing and comparison
 - [ ] allow to define a thread for watch registration to return on
-- [ ] add 'monitor' functionality: add an agent<Dictionary<Agent:Int>> to
-an agent, and this dictionary will contain the amount of queued up operations for all agents that register this monitor.
-- [ ] use dispatch_group for agent actions so that two queues can never operate on the same data structure at the same time.
-- [ ] do some tests to see if it is more performant to assign one queue to one agent upon creation, so that all actions for one agent always line up on the same queue, except for send_off, which can be dispatch_group_synced
+- [ ] add 'monitor' functionality: add an agent<Dictionary<Agent:Int>> to an agent, and this dictionary will contain the amount of queued up operations for all agents that register this monitor.
+- [ ] think about switching from kqueue to dispatch_semaphore
+- [ ] accumulates a lot of memory over time
+- [ ] add jazzy documentation (https://github.com/Realm/jazzy)
+
+##### Version 0.0.6
+- Fixed several threading issues
+- Added support for cancelling remaining actions and getting feedback via a completion block once the cancelling is done and the agent stopped processing
+- Started tagging the commits with versions. Managed to completely forget about this in the past.
 
 ##### Version 0.0.5
 - Added Mac App Example
