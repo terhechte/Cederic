@@ -9,9 +9,6 @@
 import Foundation
 import Dispatch
 
-// FIXME: Having multiple pooled queues without agent barriers fails hard time
-// because two serial queues can perform two agent actions at the same time, right?
-// SOLUTION: Agents always need to be connected to one serial queue from the start
 let kAmountOfPooledQueues = 1
 let kKqueueUserIdentifier = UInt(0x6c0176cf) // a random number
 

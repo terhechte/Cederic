@@ -47,6 +47,16 @@ being used from multiple threads.
 - [ ] cancelling agent actions currently doesn't remove all the queued up dispatch actions. try to find a way to do that.
 - [ ] define operators for easy equailty, changing and comparison
 - [ ] allow to define a thread for watch registration to return on
+- [ ] add 'monitor' functionality: add an agent<Dictionary<Agent:Int>> to
+an agent, and this dictionary will contain the amount of queued up operations for all agents that register this monitor.
+- [ ] use dispatch_group for agent actions so that two queues can never operate on the same data structure at the same time.
+- [ ] do some tests to see if it is more performant to assign one queue to one agent upon creation, so that all actions for one agent always line up on the same queue, except for send_off, which can be dispatch_group_synced
+
+##### Version 0.0.5
+- Added Mac App Example
+- Rewrote parts of the API
+- Added cancelling support for queued up agent blocks
+- Fixed several threading issues
 
 ##### Version 0.0.4
 - Removed the Kjue library in order to simplify the code
