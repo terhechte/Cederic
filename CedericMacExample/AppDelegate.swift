@@ -94,18 +94,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBOutlet weak var segmentedControl: NSSegmentedControl!
     
-    // Create the queue that holds our NSOperations
-    var queue: NSOperationQueue = {
-        var q = NSOperationQueue()
-        q.maxConcurrentOperationCount = 5
-        return q
-    }()
+    var queue: NSOperationQueue!
     
-    // Create the agent that holds the list of strings
-    var listAgent: Agent<[String]> = {
-        let start: [String] = []
-        return Agent(start, validator: nil)
-    }()
+    var listAgent: Agent<[String]>!
+    
+    // Create the agent that holds the NSSegmentedControl
+    var controlAgent: AgentRef<NSSegmentedControl>!
     
     // The content of listAgent changes all the time. NSTableView has a delay
     // between asking for the number of rows and asking for cells. During this delay,
@@ -114,14 +108,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // on a stale copy.
     var listContentCopy: [String] = []
     
-    // Create the agent that holds the NSSegmentedControl
-    var controlAgent: AgentRef<NSSegmentedControl>?
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         
+        // Create the queue that holds our NSOperations
+        self.queue = NSOperationQueue()
+        self.queue.maxConcurrentOperationCount = 5
+        
+        // Create the agent that holds the list of strings
+        self.listAgent = Agent([String](), validator: nil)
+        
         // Add a watch to the agent that will reload the table view once something changes
         self.listAgent.addWatch("mainWatch", watch: { (key, agent, state) -> Void in
-            
             // assign any state changes to our table-view-controller
             dispatch_sync(dispatch_get_main_queue(), { () -> Void in
                 self.listContentCopy = state
@@ -156,7 +154,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         // Also cancel the control agent
-        self.controlAgent.map {$0.cancelAll}
+        self.controlAgent.cancelAll()
     }
     
     @IBAction func startStop(sender: NSButton) {
