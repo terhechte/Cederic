@@ -99,7 +99,7 @@ private class AgentQueueManager {
     
     /** Randomly select one of the available pool queues and return it */
     var anyPoolQueue: dispatch_queue_t {
-        if lastPoolQueue > kAmountOfPooledQueues {
+        if lastPoolQueue >= kAmountOfPooledQueues {
             lastPoolQueue = 0
         }
         // FIXME: use a lock for this
@@ -464,7 +464,7 @@ public class Agent<T> {
 */
 infix operator <- { associativity left precedence 160 }
 
-func <- <T> (left: Agent<T>, right: T) -> Agent<T> {
+public func <- <T> (left: Agent<T>, right: T) -> Agent<T> {
     left.send { (v) -> T in
         return right
     }
