@@ -457,6 +457,20 @@ public class Agent<T> {
     }
 }
 
+/**
+    Operator Overloading to quickly update with a new value
+    
+    This does only work for agents, not for AgentRefs
+*/
+infix operator <- { associativity left precedence 160 }
+
+func <- <T> (left: Agent<T>, right: T) -> Agent<T> {
+    left.send { (v) -> T in
+        return right
+    }
+    return left
+}
+
 
 /**
     Initialize An Agent for Reference types state

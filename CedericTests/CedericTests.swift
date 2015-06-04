@@ -177,6 +177,27 @@ class CedericValTests: XCTestCase {
             })
         }
     }
+    
+    func testOperators() {
+        var state: [[String: Int]] = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+        if let c = self.cederic {
+            let readyExpectation = expectationWithDescription("ready")
+            
+            c <- state
+            
+            self.valifyExpect(readyExpectation, bx: { () -> Bool in
+                if c.value == state {
+                    return true
+                } else {
+                    return false
+                }
+            })
+            
+            waitForExpectationsWithTimeout(5, handler: { (e) -> Void in
+                XCTAssertNil(e, "Error")
+            })
+        }
+    }
 }
 
 class CedericRefTests: XCTestCase {
