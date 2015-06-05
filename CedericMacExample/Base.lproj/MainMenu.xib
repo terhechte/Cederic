@@ -13,8 +13,6 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="CedericMacExample" customModuleProvider="target">
             <connections>
-                <outlet property="segmentedControl" destination="Fia-nX-Zxh" id="ai7-Qq-XV2"/>
-                <outlet property="tableView" destination="7qV-W0-Jae" id="w5P-hW-r3g"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="gIp-Ho-8D9"/>
             </connections>
         </customObject>
@@ -802,8 +800,49 @@
                             </tabViewItem>
                             <tabViewItem label="NSMutableArray" identifier="2" id="6r7-DT-uYQ">
                                 <view key="view" id="wc5-Wr-XIC">
-                                    <rect key="frame" x="10" y="33" width="568" height="523"/>
+                                    <rect key="frame" x="10" y="33" width="472" height="523"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <customView translatesAutoresizingMaskIntoConstraints="NO" id="AJb-9N-oZp" customClass="NSBlocksView" customModule="CedericMacExample" customModuleProvider="target">
+                                            <rect key="frame" x="17" y="17" width="438" height="444"/>
+                                        </customView>
+                                        <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="AdZ-kc-i5W">
+                                            <rect key="frame" x="11" y="474" width="104" height="32"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="21" id="jJY-dG-zRO"/>
+                                                <constraint firstAttribute="width" constant="92" id="nRb-X7-Uoi"/>
+                                            </constraints>
+                                            <buttonCell key="cell" type="push" title="Start/Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="T6d-T8-qky">
+                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="startStop:" target="zVe-eG-qZY" id="DQw-d0-Voo"/>
+                                            </connections>
+                                        </button>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4sQ-TK-j0S">
+                                            <rect key="frame" x="117" y="469" width="340" height="48"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="48" id="1HS-he-jAO"/>
+                                            </constraints>
+                                            <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="8 NSOperations replacing NSColors in a NSMutableArray" id="g0b-AR-rTb">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstAttribute="bottom" secondItem="AJb-9N-oZp" secondAttribute="bottom" constant="17" id="4Ht-lG-bxF"/>
+                                        <constraint firstAttribute="trailing" secondItem="AJb-9N-oZp" secondAttribute="trailing" constant="17" id="AAj-n6-hAU"/>
+                                        <constraint firstItem="AJb-9N-oZp" firstAttribute="top" secondItem="wc5-Wr-XIC" secondAttribute="top" constant="62" id="LlH-0g-oFe"/>
+                                        <constraint firstItem="4sQ-TK-j0S" firstAttribute="top" secondItem="wc5-Wr-XIC" secondAttribute="top" constant="6" id="Reg-Fh-3CI"/>
+                                        <constraint firstItem="AJb-9N-oZp" firstAttribute="leading" secondItem="wc5-Wr-XIC" secondAttribute="leading" constant="17" id="T9e-T8-HLi"/>
+                                        <constraint firstItem="4sQ-TK-j0S" firstAttribute="leading" secondItem="AdZ-kc-i5W" secondAttribute="trailing" constant="10" id="YJQ-Ax-8Xb"/>
+                                        <constraint firstAttribute="trailing" secondItem="4sQ-TK-j0S" secondAttribute="trailing" constant="17" id="eVy-ff-y6S"/>
+                                        <constraint firstItem="AdZ-kc-i5W" firstAttribute="leading" secondItem="wc5-Wr-XIC" secondAttribute="leading" constant="17" id="ebC-OI-lu0"/>
+                                        <constraint firstItem="AdZ-kc-i5W" firstAttribute="top" secondItem="wc5-Wr-XIC" secondAttribute="top" constant="21" id="nrK-bD-Km4"/>
+                                    </constraints>
                                 </view>
                             </tabViewItem>
                         </tabViewItems>
@@ -823,6 +862,12 @@
                 <outlet property="segmentedControl" destination="Fia-nX-Zxh" id="GAQ-AB-rBk"/>
                 <outlet property="tableView" destination="7qV-W0-Jae" id="ctd-Zh-aGZ"/>
                 <outlet property="view" destination="hnj-hv-giZ" id="TI0-Sy-eeX"/>
+            </connections>
+        </customObject>
+        <customObject id="zVe-eG-qZY" customClass="NSMutableArrayExampleController" customModule="CedericMacExample" customModuleProvider="target">
+            <connections>
+                <outlet property="blocksView" destination="AJb-9N-oZp" id="ZaZ-mv-nWp"/>
+                <outlet property="view" destination="wc5-Wr-XIC" id="5jI-WU-6IC"/>
             </connections>
         </customObject>
     </objects>

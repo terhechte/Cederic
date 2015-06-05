@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4D1A3E211B2196D10051288A /* NSMutableArrayExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1A3E201B2196D10051288A /* NSMutableArrayExample.swift */; };
 		4D5A3A231B14DF660006A7B3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5A3A221B14DF660006A7B3 /* AppDelegate.swift */; };
 		4D5A3A251B14DF660006A7B3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D5A3A241B14DF660006A7B3 /* Images.xcassets */; };
 		4D5A3A281B14DF660006A7B3 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4D5A3A261B14DF660006A7B3 /* MainMenu.xib */; };
@@ -51,6 +52,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4D1A3E201B2196D10051288A /* NSMutableArrayExample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSMutableArrayExample.swift; sourceTree = "<group>"; };
 		4D5A3A1E1B14DF660006A7B3 /* CedericMacExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CedericMacExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D5A3A211B14DF660006A7B3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4D5A3A221B14DF660006A7B3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 				4D5A3A261B14DF660006A7B3 /* MainMenu.xib */,
 				4D5A3A201B14DF660006A7B3 /* Supporting Files */,
 				4DDE904F1B21936D0029B879 /* SwitArrayExample.swift */,
+				4D1A3E201B2196D10051288A /* NSMutableArrayExample.swift */,
 			);
 			path = CedericMacExample;
 			sourceTree = "<group>";
@@ -310,6 +313,7 @@
 			files = (
 				4D5A3A231B14DF660006A7B3 /* AppDelegate.swift in Sources */,
 				4DDE90501B21936D0029B879 /* SwitArrayExample.swift in Sources */,
+				4D1A3E211B2196D10051288A /* NSMutableArrayExample.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
