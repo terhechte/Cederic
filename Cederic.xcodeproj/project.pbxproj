@@ -16,6 +16,7 @@
 		4D5A3A8D1B15B0950006A7B3 /* Cederic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5A3A8C1B15B0950006A7B3 /* Cederic.swift */; };
 		4D5A3AAA1B15B5B70006A7B3 /* CedericTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5A3AA91B15B5B70006A7B3 /* CedericTests.swift */; };
 		4D5A3AAB1B15B5B70006A7B3 /* Cederic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D5A3A6D1B15B05F0006A7B3 /* Cederic.framework */; };
+		4DDE90501B21936D0029B879 /* SwitArrayExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DDE904F1B21936D0029B879 /* SwitArrayExample.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +63,7 @@
 		4D5A3AA51B15B5B70006A7B3 /* CedericTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CedericTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D5A3AA81B15B5B70006A7B3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4D5A3AA91B15B5B70006A7B3 /* CedericTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CedericTests.swift; sourceTree = "<group>"; };
+		4DDE904F1B21936D0029B879 /* SwitArrayExample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwitArrayExample.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +100,7 @@
 				4D5A3A241B14DF660006A7B3 /* Images.xcassets */,
 				4D5A3A261B14DF660006A7B3 /* MainMenu.xib */,
 				4D5A3A201B14DF660006A7B3 /* Supporting Files */,
+				4DDE904F1B21936D0029B879 /* SwitArrayExample.swift */,
 			);
 			path = CedericMacExample;
 			sourceTree = "<group>";
@@ -306,6 +309,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D5A3A231B14DF660006A7B3 /* AppDelegate.swift in Sources */,
+				4DDE90501B21936D0029B879 /* SwitArrayExample.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -567,6 +571,7 @@
 				4D5A3AB01B15B5B70006A7B3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4D7223841B0E778600DB1B6D /* Build configuration list for PBXProject "Cederic" */ = {
 			isa = XCConfigurationList;
