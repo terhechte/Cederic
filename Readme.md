@@ -1,12 +1,28 @@
 ## Cederic
 ### Clojure-Style Agents for Swift
 
-> Work in progress. You should not use this in production yet.
+> Non-blocking, thread-safe, asynchrounous access & modification of any object
+
+#### Consider this code
+8 Threads are replacing NSColor instances in a shared NSMutableArray:
+
+`let index = arc4random_uniform(UInt32(self.colorAgent.value.count))
+            
+self.colorAgent.send({ (inout a: NSMutableArray) -> NSMutableArray in
+    a.replaceObjectAtIndex(Int(index), withObject: self.color)
+    return a
+}) `
+
+This will lead to the following result:
+![Cederic NSMutableArray Example](cederic-nsmut.gif)
+
+For more, have a look at the example app, or continue reading.
 
 #### What are Agents?
 Agents provide shared access to mutable state. They allow non-blocking (asynchronous as opposed to synchronous atoms) and independent change of individual locations. Agents are submitted functions which are stored in a mailbox and then executed in order. The agent itself has state, but no logic. The submitted functions modify the state. Using an Agent is more akin to operating on a data-structure than interacting with a service.
 
-> **TLDR** Agents wrap data to allow you non-blocking, thread-safe, asynchrounous access & modification
+#### How does it work?
+Cederic employs a lot of GCD machinery and functionality in order to simplify the process of sharing state among multiple threads. Instead of having to wrap your head around semaphores, `dispatch_barriers`, `dispatch_groups` and more, you can simply use Cederic and everything works.
 
 #### How to use?
 1. Add Cederic.swift to your project
