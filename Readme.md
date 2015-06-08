@@ -6,12 +6,14 @@
 #### Consider this code
 8 Threads are replacing NSColor instances in a shared NSMutableArray:
 
-`let index = arc4random_uniform(UInt32(self.colorAgent.value.count))
+`
+let index = arc4random_uniform(UInt32(self.colorAgent.value.count))
             
 self.colorAgent.send({ (inout a: NSMutableArray) -> NSMutableArray in
     a.replaceObjectAtIndex(Int(index), withObject: self.color)
     return a
-}) `
+    })
+`
 
 This will lead to the following result:
 ![Cederic NSMutableArray Example](cederic-nsmut.gif)
