@@ -3,6 +3,9 @@
 
 > Non-blocking, thread-safe, asynchrounous access & modification of any object
 
+#### Swift 2.0 Status
+Porting to Swift 2.0 is currently being done on the swift-2.0 branch.
+
 #### Consider this code
 8 Threads are replacing NSColor instances in a shared NSMutableArray:
 
