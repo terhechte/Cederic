@@ -120,7 +120,7 @@ class NSMutableArrayExampleController : NSViewController {
     
     /// Create 8 CalcOperations
     func turnOnEngine() {
-        for i in 0..<8 {
+        for _ in 0..<8 {
             let anOperation = MutableCalcOperation(agent: self.listAgent)
             self.queue.addOperation(anOperation)
         }

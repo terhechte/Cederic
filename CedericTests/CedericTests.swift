@@ -112,21 +112,21 @@ class CedericValTests: XCTestCase {
     
     
     func testAddState() {
-        var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+        let state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
         self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
             return v + [["d": 4]]
         })
     }
     
     func testRemoveState() {
-        var state = [["a": 1], ["b": 2]]
+        let state = [["a": 1], ["b": 2]]
         self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
             return Array(v[0..<(v.count-1)])
         })
     }
     
     func testChangeState() {
-        var state = [["a": 0], ["b": 2], ["c": 3]]
+        let state = [["a": 0], ["b": 2], ["c": 3]]
         self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
             return Array([["a": 0]] + v[1..<v.count])
         })
@@ -248,7 +248,7 @@ class CedericRefTests: XCTestCase {
     }
     
     func testAddState() {
-        var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+        let state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
         self.testStateTransition(state, modifier: { (v) -> [[String: Int]] in
             v.append(["d": 4])
             return v
@@ -256,7 +256,7 @@ class CedericRefTests: XCTestCase {
     }
     
     func testRemoveState() {
-        var state = [["a": 1], ["b": 2]]
+        let state = [["a": 1], ["b": 2]]
         self.testStateTransition(state, modifier: { v in
             v.removeLast()
             return v
@@ -264,7 +264,7 @@ class CedericRefTests: XCTestCase {
     }
     
     func testChangeState() {
-        var state = [["a": 0], ["b": 2], ["c": 3]]
+        let state = [["a": 0], ["b": 2], ["c": 3]]
         self.testStateTransition(state, modifier: { v in
             v.replaceRange(0..<1, with: [["a": 0]])
             return v

@@ -15,7 +15,7 @@ let kKqueueUserIdentifier = UInt(0x6c0176cf) // a random number
 /** 
     Create a new kqueue Object
     
-    :returns: The file descriptor of the kernel queue
+    - returns: The file descriptor of the kernel queue
 */
 private func setupQueue() -> Int32 {
     let k = kqueue()
@@ -25,9 +25,9 @@ private func setupQueue() -> Int32 {
 /** 
     Post a new message to a kqueue. The payload can be a pointer to something.
 
-    :param: q A kqueue file descriptor, as returned by *setupQueue()*
-    :param: value A pointer to a payload you wish to post to the kqueue
-    :returns: A number > 0 for successful posting, and -1 if there is an error
+    - parameter q: A kqueue file descriptor, as returned by *setupQueue()*
+    - parameter value: A pointer to a payload you wish to post to the kqueue
+    - returns: A number > 0 for successful posting, and -1 if there is an error
 */
 private func postToQueue(queue: Int32, value: UnsafeMutablePointer<Void>) -> Int32 {
     let flags = EV_ENABLE
@@ -40,8 +40,8 @@ private func postToQueue(queue: Int32, value: UnsafeMutablePointer<Void>) -> Int
 /** 
     Blocking read a value from a kqueue
 
-    :param: q A kqueue file descriptor, as returned by *setupQueue()*
-    :returns: A pointer to something. The pointer will be == nil if postToQueue was called with a nil pointer
+    - parameter q: A kqueue file descriptor, as returned by *setupQueue()*
+    - returns: A pointer to something. The pointer will be == nil if postToQueue was called with a nil pointer
 
     *Warning*: Always test the pointer against nil before unpacking the value pointed to with .memory
 */
@@ -50,7 +50,7 @@ private func readFromQueue(queue: Int32) -> UnsafeMutablePointer<Void> {
     let flags = EV_ADD | EV_CLEAR | EV_ENABLE
     var kev: kevent = kevent(ident: UInt(kKqueueUserIdentifier), filter: Int16(EVFILT_USER), flags: UInt16(flags), fflags: UInt32(0), data: Int(0), udata: nil)
     
-    let newEvent = kevent(queue, &kev, 1, evlist, 1, nil)
+    kevent(queue, &kev, 1, evlist, 1, nil)
     
     let m = evlist[0].udata
     
@@ -68,12 +68,20 @@ private func readFromQueue(queue: Int32) -> UnsafeMutablePointer<Void> {
 private class AgentQueueManager {
     
     // This queue manages the process operations of all agents. It syncs the adding, removal, and calling of them.
-    lazy var agentProcessQueue = dispatch_queue_create("com.cederic.agentProcessQueue", DISPATCH_QUEUE_SERIAL)
+    lazy private var agentProcessQueue:dispatch_queue_t = { () -> dispatch_queue_t in
+        return dispatch_queue_create("com.cederic.agentProcessQueue", DISPATCH_QUEUE_SERIAL)
+        }()
     
-    lazy var agentProcessConcurrentQueue = dispatch_queue_create("com.cederic.agentProcessConcurrentQueue", DISPATCH_QUEUE_CONCURRENT)
+    
+    lazy var agentProcessConcurrentQueue:dispatch_queue_t = { ()->dispatch_queue_t in
+        return dispatch_queue_create("com.cederic.agentProcessConcurrentQueue", DISPATCH_QUEUE_CONCURRENT)
+        }()
+    
     
     // This queue manages the adding of new actions to agents. It syncs the adding, removal, and calling of them.
-    lazy var agentBlockQueue = dispatch_queue_create("com.cederic.agentBlockQueue", DISPATCH_QUEUE_SERIAL)
+    lazy var agentBlockQueue:dispatch_queue_t = { ()->dispatch_queue_t in
+        return dispatch_queue_create("com.cederic.agentBlockQueue", DISPATCH_QUEUE_SERIAL)
+        }()
     
     // This queue manages the actual calculation of the process actions. This is where the user-defined action block
     // will be processed
@@ -110,8 +118,8 @@ private class AgentQueueManager {
     /** 
     Add a new agent process operation to the internal operations dict
     
-    :param: op A process operation that will be called whenever new actions for the agent come in
-    :returns: The unique queue id of this agent in the manager. Used to identify the agent to the manager in subsequent operations
+    - parameter op: A process operation that will be called whenever new actions for the agent come in
+    - returns: The unique queue id of this agent in the manager. Used to identify the agent to the manager in subsequent operations
     */
     func add(op: ()->()) -> AgentQueueOPID {
         let uuid = NSUUID().UUIDString
@@ -124,7 +132,7 @@ private class AgentQueueManager {
     /**
     Remove an agent process from the internal operations dict
 
-    :param: opid The unique queue id of the agent in the manager
+    - parameter opid: The unique queue id of the agent in the manager
     */
     func remove(opid: String) {
         dispatch_barrier_async(self.agentProcessQueue , { () -> Void in
@@ -261,8 +269,8 @@ public class Agent<T> {
     /**
     Initialize an Agent.
     
-    :param: initialState The internal state that the agent should store
-    :param: validator A validation function which will be given the proposed new state and the old state. Returns bool success if the state transition is valid
+    - parameter initialState: The internal state that the agent should store
+    - parameter validator: A validation function which will be given the proposed new state and the old state. Returns bool success if the state transition is valid
     */
     public init(_ initialState: T, validator: AgentValidator?) {
         self.state = initialState
@@ -310,7 +318,7 @@ public class Agent<T> {
     Any new send/sendOff actions send after cancel and before the completion block triggers
     may or may not be executed. You should always wait for the completion to finish. Before sending new actions.
     
-    :param: completion A completion block that will be executed once all outstanding actions have been cleared
+    - parameter completion: A completion block that will be executed once all outstanding actions have been cleared
     */
     public func cancelAll(completion: dispatch_block_t? = nil) {
         // If we're already cancelling, ignore this
@@ -339,8 +347,8 @@ public class Agent<T> {
     /**
     Add a watch to the agent. Watches will be notified of any state changes
     
-    :param: key The identifier of the watch
-    :param: watch The agentwatch fn.
+    - parameter key: The identifier of the watch
+    - parameter watch: The agentwatch fn.
     
     The AgentWatch will be called with the following parameters:
     
@@ -366,7 +374,7 @@ public class Agent<T> {
     /**
     Remove a watch from the agent.
     
-    :param: key The identifier of the watch.
+    - parameter key: The identifier of the watch.
     */
     public func removeWatch(key: String) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
@@ -377,7 +385,7 @@ public class Agent<T> {
     private func sendToManager(fn: AgentAction, tp: AgentSendType) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.actions.append((tp, fn))
-            postToQueue(queueManager.kQueue, &self.opidx)
+            postToQueue(queueManager.kQueue, value: &self.opidx)
         })
     }
     
@@ -443,14 +451,13 @@ public class Agent<T> {
             for fn in act {
                 switch fn {
                 case (.Pooled, let f):
-                    processOnQueue(self.poolQueue, f)
+                    processOnQueue(self.poolQueue, f: f)
                 case (.Solo, let f):
                     // Create and destroy a queue just for this
                     let uuid = NSUUID().UUIDString
                     let ourQueue = dispatch_queue_create(uuid, nil)
                     dispatch_group_wait(self.dispatchGroup, DISPATCH_TIME_FOREVER)
-                    processOnQueue(ourQueue, f)
-                default: ()
+                    processOnQueue(ourQueue, f: f)
                 }
             }
         }

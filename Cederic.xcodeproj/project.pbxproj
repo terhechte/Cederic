@@ -246,6 +246,7 @@
 		4D7223811B0E778600DB1B6D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0630;
 				ORGANIZATIONNAME = "Benedikt Terhechte";
 				TargetAttributes = {
