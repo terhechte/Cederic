@@ -16,7 +16,7 @@ class CedericValTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        var state = [["a": 1], ["b": 2], ["c": 3]]
+        let state = [["a": 1], ["b": 2], ["c": 3]]
         self.cederic = Agent(state, validator: nil)
         
         // Create an Agent with a validator that ignores values <= 5
@@ -69,7 +69,7 @@ class CedericValTests: XCTestCase {
     func testValidatorIgnore() {
         if let c = self.cedericValidator {
             
-            var newState = 10
+            let newState = 10
             let readyExpectation = expectationWithDescription("ready")
             
             c.send({(inout s:Int)->Int in return 1})
@@ -91,7 +91,7 @@ class CedericValTests: XCTestCase {
     func testValidatorValidate() {
         if let c = self.cedericValidator {
             
-            var newState = 50
+            let newState = 50
             let readyExpectation = expectationWithDescription("ready")
             
             c.send({(inout s:Int)->Int in return 50})
@@ -136,7 +136,7 @@ class CedericValTests: XCTestCase {
         if let c = self.cederic {
             let readyExpectation = expectationWithDescription("ready")
             
-            var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+            let state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
             c.addWatch("w1", watch: { (k, ag, v) -> Void in
                 if v == state {
                     readyExpectation.fulfill()
@@ -159,7 +159,7 @@ class CedericValTests: XCTestCase {
         if let c = self.cederic {
             var watchTriggered = false
             
-            var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+            _ = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
             c.addWatch("w1", watch: { (k, ag, v) -> Void in
                 watchTriggered = true
             })
@@ -179,7 +179,7 @@ class CedericValTests: XCTestCase {
     }
     
     func testOperators() {
-        var state: [[String: Int]] = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+        let state: [[String: Int]] = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
         if let c = self.cederic {
             let readyExpectation = expectationWithDescription("ready")
             
@@ -206,7 +206,7 @@ class CedericRefTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        var state = [["a": 1], ["b": 2], ["c": 3]]
+        let state = [["a": 1], ["b": 2], ["c": 3]]
         self.cederic = AgentRef(state)
     }
     
@@ -275,7 +275,7 @@ class CedericRefTests: XCTestCase {
         if let c = self.cederic {
             let readyExpectation = expectationWithDescription("ready")
             
-            var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+            let state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
             c.addWatch("w1", watch: { (k, ag, v) -> Void in
                 if v == state {
                     readyExpectation.fulfill()
@@ -297,7 +297,7 @@ class CedericRefTests: XCTestCase {
         if let c = self.cederic {
             var watchTriggered = false
             
-            var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+            _ = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
             c.addWatch("w1", watch: { (k, ag, v) -> Void in
                 watchTriggered = true
             })
@@ -380,7 +380,7 @@ class CedericRefTests: XCTestCase {
             
             let maxagents = 50000
             var agents: [Agent<Int>] = []
-            for i in 1...maxagents {
+            for _ in 1...maxagents {
                 agents.append(Agent(5, validator: nil))
             }
             
