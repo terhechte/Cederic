@@ -3,6 +3,10 @@
 
 > Non-blocking, thread-safe, asynchrounous access & modification of any object
 
+#### Swift 2.0 Status
+Currently crashes with EXC_BAD_ACCESS in debug and normal builds.
+However, it works fine if the new Xcode7 Address Sanitizer is used
+
 #### Consider this code
 8 Threads are replacing NSColor instances in a shared NSMutableArray:
 
@@ -32,15 +36,14 @@ Cederic employs a lot of GCD machinery and functionality in order to simplify th
 1. Add Cederic.swift to your project
 2. Create an Agent:
 `
-var ag = AgentVal<[Int]>([1, 2, 3], validator: nil)
+var ag = Agent<[Int]>([1, 2, 3], validator: nil)
 `
 3. Process an operation on the Agent
 `
-ag.send({ v in return y + [4]})
+ag.send { v in return y + [4]}
 `
-(This is a bit cumbersome due to the Swift Value semantics and the Array type)
 
-4. The state will be updated
+4. At some point later in time, the state will be updated
 `
 println(ag.value)
 // returns [1, 2, 3, 4]
@@ -49,7 +52,6 @@ println(ag.value)
 #### Status
 - Basic API implemented
 - Lacks Documentation
-- Lacks fancy example project
 - 27% CPU as a Release Build on Retina 13" (2012) with 50000 agents and (around) 1000 data updates per second
 - High memory consumption for many agents (60 mb vs. 4.5 mb for a similar non-asynchronous simple loop over such a structure)
 - 10MB memory growth (from 50mb to 60mb) after ~4500000 data updates over the course of 2 hours (50.000 agents) 
@@ -64,11 +66,8 @@ being used from multiple threads.
 
 #### TODO
 - [ ] if actions are generated too fast, operations queue up, and it can take quite long until all operations have been processed
-- [ ] cancelling agent actions currently doesn't remove all the queued up dispatch actions. try to find a way to do that.
-- [ ] define operators for easy equailty, changing and comparison
-- [ ] allow to define a thread for watch registration to return on
 - [ ] add 'monitor' functionality: add an agent<Dictionary<Agent:Int>> to an agent, and this dictionary will contain the amount of queued up operations for all agents that register this monitor.
-- [ ] think about switching from kqueue to dispatch_semaphore
+- [ ] think about switching from kqueue to dispatch_semaphore or mach ports
 - [ ] accumulates a lot of memory over time
 - [ ] add jazzy documentation (https://github.com/Realm/jazzy)
 
