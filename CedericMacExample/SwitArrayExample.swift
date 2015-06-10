@@ -29,7 +29,7 @@ class CalcOperation: NSOperation {
             if self.cancelled {
                 return
             }
-            
+            /*
             let randomValue = arc4random_uniform(100)
             
             // Tell the Segmented Control, that we're active
@@ -44,6 +44,7 @@ class CalcOperation: NSOperation {
                 })
                 return i
             })
+            */
             
             // Wait a short amount of time
             usleep(1000 * arc4random_uniform(15))
