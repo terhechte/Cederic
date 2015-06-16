@@ -1,15 +1,18 @@
 ## Cederic
-### Clojure-Style Agents for Swift
+### Agents for Swift
+#### Agents are Non-Blocking, thread-safe, asynchrounous data structures
 
-> Non-blocking, thread-safe, asynchrounous access & modification of any object
+![Cederic Logo](static/cederic-logo-github.png)
+
+> Non-blocking, thread-safe, asynchrounous access & modification of any immutable or mutable object
 
 #### Swift 2.0 Status
-Porting to Swift 2.0 is currently being done on the swift-2.0 branch.
+- Porting to Swift 2.0 is currently being done on the swift-2.0 branch.
+- Currently crashes with EXC_BAD_ACCESS in debug and normal builds.
+- However, it works fine when the new Xcode7 Address Sanitizer is used
 
-#### Consider this code
+#### Consider the following code
 8 Threads are replacing NSColor instances in a shared NSMutableArray:
-
-
 
 ```
 let index = arc4random_uniform(UInt32(self.colorAgent.value.count))
@@ -21,7 +24,7 @@ self.colorAgent.send({ (inout a: NSMutableArray) -> NSMutableArray in
 ```
 
 This will lead to the following result:
-![Cederic NSMutableArray Example](cederic-nsmut.gif)
+![Cederic NSMutableArray Example](static/cederic-nsmut.gif)
 
 For more, have a look at the example app, or continue reading.
 
