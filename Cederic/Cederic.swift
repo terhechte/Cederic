@@ -227,27 +227,33 @@ enum AgentSendType {
 */
 
 protocol AgentProtocol {
+    typealias ElementType
     typealias AgentAction
-}
-
-public class Agent<T> : AgentProtocol {
-    
-    /// Type definition for an action to be applied to the state
-    typealias AgentAction = (T)->T
     
     /// Type definition for a watch
-    typealias AgentWatch = (String, Agent<T>, T)->Void
+    typealias AgentWatch
     
     /// Type definition for a validator
-    typealias AgentValidator = (Agent<T>, oldstate: T, newstate: T) -> Bool
+    typealias AgentValidator
+}
+
+extension AgentProtocol {
+}
+
+public class _AgentBase<T, A> : AgentProtocol {
     
-    /// Easy way for the user to access the agent's state
-    public var value: T {
-        return state
-    }
+    typealias ElementType = T
+    
+    typealias AgentAction = A
+    
+    /// Type definition for a watch
+    typealias AgentWatch = (String, _AgentBase<T, A>, T)->Void
+    
+    /// Type definition for a validator
+    typealias AgentValidator = (_AgentBase<T, A>, oldstate: T, newstate: T) -> Bool
     
     /// The agent's state
-    private var state: T
+    private var state: ElementType
     
     /// Outstanding actions to be applied to the agent's state
     private var actions: [(AgentSendType, AgentAction)]
@@ -278,17 +284,80 @@ public class Agent<T> : AgentProtocol {
     */
     public init(_ initialState: T, validator: AgentValidator?) {
         self.state = initialState
+        self.validator = validator
         self.watches = [:]
         self.actions = []
         self.dispatchGroup = dispatch_group_create()
         self.poolQueue = queueManager.anyPoolQueue
         self.opidx = queueManager.add(self.process)
-        self.validator = validator
     }
     
     deinit {
         queueManager.remove(self.opidx)
     }
+    
+    private func calculate(state: T, fn: AgentAction) {
+        fatalError("Cannot use the AgentBase")
+    }
+    
+    
+    // Internal accounting state to get a rough measure of outstanding tasks, mostly for
+    // monitoring purposes
+    private var processOnQueueCount = 0
+    
+    private func process() {
+        
+        // create a copy
+        var actionsCopy: [(AgentSendType, AgentAction)]? = nil
+        
+        dispatch_sync(queueManager.agentBlockQueue, { () -> Void in
+            actionsCopy = self.actions
+            
+            if self.actions.count > 0 {
+                self.actions.removeAll(keepCapacity: true)
+            } else {
+                return;
+            }
+        })
+        
+        func processOnQueue(q: dispatch_queue_t, f: AgentAction) {
+            self.processOnQueueCount += 1
+            
+            dispatch_group_enter(self.dispatchGroup)
+            dispatch_group_async(self.dispatchGroup,
+                q) { () -> Void in
+                    
+                    // Don't perform any further processing if the operations are cancelled
+                    if !self.isCancelled {
+                        self.calculate(self.state, fn: f)
+                        self.processOnQueueCount -= 1
+                    }
+                    
+                    dispatch_group_leave(self.dispatchGroup)
+            }
+        }
+        
+        if let act = actionsCopy  {
+            for fn in act {
+                switch fn {
+                case (.Pooled, let f):
+                    processOnQueue(self.poolQueue, f: f)
+                case (.Solo, let f):
+                    // Create and destroy a queue just for this
+                    let uuid = NSUUID().UUIDString
+                    let ourQueue = dispatch_queue_create(uuid, nil)
+                    dispatch_group_wait(self.dispatchGroup, DISPATCH_TIME_FOREVER)
+                    processOnQueue(ourQueue, f: f)
+                }
+            }
+        }
+    }
+    
+    /// Easy way for the user to access the agent's state
+    public var value: T {
+        return state
+    }
+    
     
     /**
     Add an action to the internal mailbox to be applied to the current state.
@@ -297,7 +366,7 @@ public class Agent<T> : AgentProtocol {
     
     Your code will be executed on one of the pooled dispatch queues.
     */
-    public func send(fn: AgentAction) {
+    public func send(fn: A) {
         self.sendToManager(fn, tp: AgentSendType.Pooled)
     }
     
@@ -309,7 +378,7 @@ public class Agent<T> : AgentProtocol {
     
     Your code will be executed on a serial dispatch queue specifically created for executing your code.
     */
-    public func sendOff(fn: AgentAction) {
+    public func sendOff(fn: A) {
         self.sendToManager(fn, tp: AgentSendType.Solo)
     }
     
@@ -392,11 +461,19 @@ public class Agent<T> : AgentProtocol {
             postToQueue(queueManager.kQueue, value: &self.opidx)
         })
     }
+}
+
+
+final public class Agent<T> : _AgentBase<T,(T)->T>  {
     
-    private func calculate(state: T, fn: AgentAction) {
+    typealias ElementType = T
+    
+    override public init(_ initialState: T, validator: AgentValidator?) {
+        super.init(initialState, validator: validator)
+    }
+    
+    override private func calculate(state: T, fn: AgentAction) {
         // Calculate the new state
-        //var s = self.state
-//        var s = state
         let sx = fn(state)
         
         // If there is a validator, see if it validates
@@ -416,57 +493,6 @@ public class Agent<T> : AgentProtocol {
         self.state = sx
     }
     
-    // Internal accounting state to get a rough measure of outstanding tasks, mostly for
-    // monitoring purposes
-    private var processOnQueueCount = 0
-    
-    private func process() {
-        
-        // create a copy
-        var actionsCopy: [(AgentSendType, AgentAction)]? = nil
-        
-        dispatch_sync(queueManager.agentBlockQueue, { () -> Void in
-            actionsCopy = self.actions
-            
-            if self.actions.count > 0 {
-                self.actions.removeAll(keepCapacity: true)
-            } else {
-                return;
-            }
-        })
-        
-        func processOnQueue(q: dispatch_queue_t, f: AgentAction) {
-            self.processOnQueueCount += 1
-            
-            dispatch_group_enter(self.dispatchGroup)
-            dispatch_group_async(self.dispatchGroup,
-                q) { () -> Void in
-                    
-                    // Don't perform any further processing if the operations are cancelled
-                    if !self.isCancelled {
-                        self.calculate(self.state, fn: f)
-                        self.processOnQueueCount -= 1
-                    }
-                    
-                    dispatch_group_leave(self.dispatchGroup)
-            }
-        }
-        
-        if let act = actionsCopy  {
-            for fn in act {
-                switch fn {
-                case (.Pooled, let f):
-                    processOnQueue(self.poolQueue, f: f)
-                case (.Solo, let f):
-                    // Create and destroy a queue just for this
-                    let uuid = NSUUID().UUIDString
-                    let ourQueue = dispatch_queue_create(uuid, nil)
-                    dispatch_group_wait(self.dispatchGroup, DISPATCH_TIME_FOREVER)
-                    processOnQueue(ourQueue, f: f)
-                }
-            }
-        }
-    }
 }
 
 /**
@@ -491,22 +517,20 @@ public func <- <T> (left: Agent<T>, right: T) -> Agent<T> {
     This also effectively disables validators as the operation cannot
     be undone.
 */
-public class AgentRef<T> : Agent<T> {
-    
-    typealias AgentAction = (inout T)->T
+
+final public class AgentRef<T> : _AgentBase<T,(inout T)->Void>  {
     
     public init(_ initialState: T) {
         super.init(initialState, validator: nil)
     }
-    
-//    private override func calculate(f: AgentAction) {
-//        // Calculate the state modifications
-//            f(&self.state)
-//            
-//            // Notify the watches
-//            for (key, watch) in self.watches {
-//                watch(key, self, self.state)
-//            }
-//    }
+
+    override private func calculate(state: T, fn: AgentAction) {
+            fn(&self.state)
+        
+            // Notify the watches
+            for (key, watch) in self.watches {
+                watch(key, self, self.state)
+            }
+    }
 }
 
