@@ -518,7 +518,7 @@ public func <- <T> (left: Agent<T>, right: T) -> Agent<T> {
     be undone.
 */
 
-final public class AgentRef<T> : _AgentBase<T,(inout T)->Void>  {
+final public class AgentRef<T where T:NSObject> : _AgentBase<T,(inout T)->Void>  {
     
     public init(_ initialState: T) {
         super.init(initialState, validator: nil)
