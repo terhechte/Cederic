@@ -46,7 +46,7 @@ class CedericValTests: XCTestCase {
         })
     }
     
-    func testStateTransition(newState: [[String: Int]], modifier: (inout [[String: Int]])->[[String: Int]]) {
+    func testStateTransition(newState: [[String: Int]], modifier: ([[String: Int]])->[[String: Int]]) {
         if let c = self.cederic {
             let readyExpectation = expectationWithDescription("ready")
             
@@ -72,7 +72,7 @@ class CedericValTests: XCTestCase {
             let newState = 10
             let readyExpectation = expectationWithDescription("ready")
             
-            c.send({(inout s:Int)->Int in return 1})
+            c.send({(s:Int)->Int in return 1})
             
             self.valifyExpect(readyExpectation, bx: { () -> Bool in
                 if c.value == newState {
@@ -94,7 +94,7 @@ class CedericValTests: XCTestCase {
             let newState = 50
             let readyExpectation = expectationWithDescription("ready")
             
-            c.send({(inout s:Int)->Int in return 50})
+            c.send({(s:Int)->Int in return 50})
             
             self.valifyExpect(readyExpectation, bx: { () -> Bool in
                 if c.value == newState {
@@ -113,21 +113,21 @@ class CedericValTests: XCTestCase {
     
     func testAddState() {
         let state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
-        self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
+        self.testStateTransition(state, modifier: { (v: [[String: Int]]) -> [[String: Int]] in
             return v + [["d": 4]]
         })
     }
     
     func testRemoveState() {
         let state = [["a": 1], ["b": 2]]
-        self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
+        self.testStateTransition(state, modifier: { (v: [[String: Int]]) -> [[String: Int]] in
             return Array(v[0..<(v.count-1)])
         })
     }
     
     func testChangeState() {
         let state = [["a": 0], ["b": 2], ["c": 3]]
-        self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
+        self.testStateTransition(state, modifier: { (v: [[String: Int]]) -> [[String: Int]] in
             return Array([["a": 0]] + v[1..<v.count])
         })
     }
@@ -200,6 +200,7 @@ class CedericValTests: XCTestCase {
     }
 }
 
+/*
 class CedericRefTests: XCTestCase {
     
     var cederic: AgentRef<[[String: Int]]>?
@@ -398,4 +399,4 @@ class CedericRefTests: XCTestCase {
         }
     }
     
-}
+}*/

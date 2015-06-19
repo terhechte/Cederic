@@ -63,7 +63,7 @@ class CalcOperation: NSOperation {
                 counter = 0
             }
             
-            self.listAgent.send({(inout l: [String]) in
+            self.listAgent.send({(l: [String]) in
                 // Insert at the top.
                 // Empty for counter = 0
                 if cx {

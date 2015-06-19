@@ -226,10 +226,14 @@ enum AgentSendType {
     - Use validators to valify a state transition (only for AgentValue)
 */
 
-public class Agent<T> {
+protocol AgentProtocol {
+    typealias AgentAction
+}
+
+public class Agent<T> : AgentProtocol {
     
     /// Type definition for an action to be applied to the state
-    typealias AgentAction = (inout T)->T
+    typealias AgentAction = (T)->T
     
     /// Type definition for a watch
     typealias AgentWatch = (String, Agent<T>, T)->Void
@@ -389,10 +393,11 @@ public class Agent<T> {
         })
     }
     
-    private func calculate(f: AgentAction) {
+    private func calculate(state: T, fn: AgentAction) {
         // Calculate the new state
-        var s = self.state
-        let sx = f(&s)
+        //var s = self.state
+//        var s = state
+        let sx = fn(state)
         
         // If there is a validator, see if it validates
         if let v = self.validator {
@@ -439,7 +444,7 @@ public class Agent<T> {
                     
                     // Don't perform any further processing if the operations are cancelled
                     if !self.isCancelled {
-                        self.calculate(f)
+                        self.calculate(self.state, fn: f)
                         self.processOnQueueCount -= 1
                     }
                     
@@ -488,18 +493,20 @@ public func <- <T> (left: Agent<T>, right: T) -> Agent<T> {
 */
 public class AgentRef<T> : Agent<T> {
     
+    typealias AgentAction = (inout T)->T
+    
     public init(_ initialState: T) {
         super.init(initialState, validator: nil)
     }
     
-    private override func calculate(f: AgentAction) {
-        // Calculate the state modifications
-            f(&self.state)
-            
-            // Notify the watches
-            for (key, watch) in self.watches {
-                watch(key, self, self.state)
-            }
-    }
+//    private override func calculate(f: AgentAction) {
+//        // Calculate the state modifications
+//            f(&self.state)
+//            
+//            // Notify the watches
+//            for (key, watch) in self.watches {
+//                watch(key, self, self.state)
+//            }
+//    }
 }
 
