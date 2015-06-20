@@ -12,10 +12,9 @@ import Dispatch
 let kAmountOfPooledQueues = 4
 let kKqueueUserIdentifier = UInt(0x6c0176cf) // a random number
 
-/** 
+/**
     Create a new kqueue Object
-    
-    - returns: The file descriptor of the kernel queue
+    - Returns: The file descriptor of the kernel queue
 */
 private func setupQueue() -> Int32 {
     let k = kqueue()
@@ -194,30 +193,30 @@ enum AgentSendType {
 
     - Value Types: This agent receives actions which modify the value in place and return an updated value.
 
-          ag.send({ (inout s: [Int]) -> [Int] in var return s + [4]})
-          ag.send({ (inout s: Int) -> Int in return s * 20})
+          ag.send({ (s: [Int]) -> [Int] in var return s + [4]})
+          ag.send({ (s: Int) -> Int in return s * 20})
     
-    - Reference Types: This agent receives an inout reference to the state and can modify it
+    - Reference Types: This agent receives a NSObject-based type (say an UI Element)
 
-          ag.send({ (inout s: [Int]) -> Void in s.append(4); return s})
-          ag.send({ (inout s: Int) -> Void in s +=4; return s})
+          ag.send({ (s: NSMutableArray) -> Void in s.addObject(4) })
+          ag.send({ (s: UIButton) -> Void in s.enabled = true })
 
     Value type Agents have the advantage of offering validators which allow you to valify any state transition.
     You want to use a reference type agent if your state is a custom class, for example:
 
           class example { var prop: Int = 0 }
-          ag.send({ (inout s: example) -> Void in s.prop += 5; return})
+          ag.send({ (s: example) -> Void in s.prop += 5})
 
     Usage:
 
     1. Initialize the agent with some state:
-      let ag: AgentValue<[Int32]> = Agent([0, 1, 2, 3], nil)
+      let ag: Agent<[Int32]> = Agent([0, 1, 2, 3], nil)
     2. Update the state by sending it an action (The update will happen asynchronously at some point in the near future)
       ag.send({ s in return s + [4]})
     4. Retrieve the state of the agent via value:
       let v: [Int32] = ag.value
     5. Add a watch to be notified of any state changes
-      ag.addWatch({(o, n) in println("new state \(n), old state \(o)")
+      ag.addWatch({(agent, oldstate, newstate) in println("new state \(newstate), old state \(oldstate)")
 
     Features:
 
@@ -513,11 +512,9 @@ public func <- <T> (left: Agent<T>, right: T) -> Agent<T> {
 /**
     Initialize An Agent for Reference types state
 
-    This means that any the actions are handed a inout reference to the state and can modify it at will.
-    This also effectively disables validators as the operation cannot
-    be undone.
+    This means that any the actions are handed a reference to the state and can modify it at will.
+    This also effectively disables validators as the operation cannot be undone.
 */
-
 final public class AgentRef<T where T:NSObject> : _AgentBase<T,(T)->Void>  {
     
     public init(_ initialState: T) {

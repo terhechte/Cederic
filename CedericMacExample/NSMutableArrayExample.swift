@@ -11,7 +11,8 @@ import AppKit
 import Cederic
 
 /**
-  Simple NSView subclass that takes an NSArray of NSColors as data and draws each item as a n x n block */
+  Simple NSView subclass that takes an NSArray of NSColors as data and draws each item as a n x n block 
+*/
 class NSBlocksView : NSView {
     var content: NSArray? = nil {
         didSet {
