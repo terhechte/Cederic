@@ -11,7 +11,8 @@ import AppKit
 import Cederic
 
 /**
-  Simple NSView subclass that takes an NSArray of NSColors as data and draws each item as a n x n block */
+  Simple NSView subclass that takes an NSArray of NSColors as data and draws each item as a n x n block 
+*/
 class NSBlocksView : NSView {
     var content: NSArray? = nil {
         didSet {
@@ -76,9 +77,8 @@ class MutableCalcOperation: NSOperation {
             
             let index = arc4random_uniform(UInt32(self.colorAgent.value.count))
             
-            self.colorAgent.send({ (inout a: NSMutableArray) -> NSMutableArray in
+            self.colorAgent.send({ (a: NSMutableArray) -> Void in
                 a.replaceObjectAtIndex(Int(index), withObject: self.color)
-                return a
             })
             
             // Wait a short amount of time
@@ -120,7 +120,7 @@ class NSMutableArrayExampleController : NSViewController {
     
     /// Create 8 CalcOperations
     func turnOnEngine() {
-        for i in 0..<8 {
+        for _ in 0..<8 {
             let anOperation = MutableCalcOperation(agent: self.listAgent)
             self.queue.addOperation(anOperation)
         }

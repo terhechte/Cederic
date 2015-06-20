@@ -16,7 +16,7 @@ class CedericValTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        var state = [["a": 1], ["b": 2], ["c": 3]]
+        let state = [["a": 1], ["b": 2], ["c": 3]]
         self.cederic = Agent(state, validator: nil)
         
         // Create an Agent with a validator that ignores values <= 5
@@ -46,7 +46,7 @@ class CedericValTests: XCTestCase {
         })
     }
     
-    func testStateTransition(newState: [[String: Int]], modifier: (inout [[String: Int]])->[[String: Int]]) {
+    func testStateTransition(newState: [[String: Int]], modifier: ([[String: Int]])->[[String: Int]]) {
         if let c = self.cederic {
             let readyExpectation = expectationWithDescription("ready")
             
@@ -69,10 +69,10 @@ class CedericValTests: XCTestCase {
     func testValidatorIgnore() {
         if let c = self.cedericValidator {
             
-            var newState = 10
+            let newState = 10
             let readyExpectation = expectationWithDescription("ready")
             
-            c.send({(inout s:Int)->Int in return 1})
+            c.send({(s:Int)->Int in return 1})
             
             self.valifyExpect(readyExpectation, bx: { () -> Bool in
                 if c.value == newState {
@@ -91,10 +91,10 @@ class CedericValTests: XCTestCase {
     func testValidatorValidate() {
         if let c = self.cedericValidator {
             
-            var newState = 50
+            let newState = 50
             let readyExpectation = expectationWithDescription("ready")
             
-            c.send({(inout s:Int)->Int in return 50})
+            c.send({(s:Int)->Int in return 50})
             
             self.valifyExpect(readyExpectation, bx: { () -> Bool in
                 if c.value == newState {
@@ -112,22 +112,22 @@ class CedericValTests: XCTestCase {
     
     
     func testAddState() {
-        var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
-        self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
+        let state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+        self.testStateTransition(state, modifier: { (v: [[String: Int]]) -> [[String: Int]] in
             return v + [["d": 4]]
         })
     }
     
     func testRemoveState() {
-        var state = [["a": 1], ["b": 2]]
-        self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
+        let state = [["a": 1], ["b": 2]]
+        self.testStateTransition(state, modifier: { (v: [[String: Int]]) -> [[String: Int]] in
             return Array(v[0..<(v.count-1)])
         })
     }
     
     func testChangeState() {
-        var state = [["a": 0], ["b": 2], ["c": 3]]
-        self.testStateTransition(state, modifier: { (inout v: [[String: Int]]) -> [[String: Int]] in
+        let state = [["a": 0], ["b": 2], ["c": 3]]
+        self.testStateTransition(state, modifier: { (v: [[String: Int]]) -> [[String: Int]] in
             return Array([["a": 0]] + v[1..<v.count])
         })
     }
@@ -136,7 +136,7 @@ class CedericValTests: XCTestCase {
         if let c = self.cederic {
             let readyExpectation = expectationWithDescription("ready")
             
-            var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+            let state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
             c.addWatch("w1", watch: { (k, ag, v) -> Void in
                 if v == state {
                     readyExpectation.fulfill()
@@ -159,7 +159,7 @@ class CedericValTests: XCTestCase {
         if let c = self.cederic {
             var watchTriggered = false
             
-            var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+            _ = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
             c.addWatch("w1", watch: { (k, ag, v) -> Void in
                 watchTriggered = true
             })
@@ -179,7 +179,7 @@ class CedericValTests: XCTestCase {
     }
     
     func testOperators() {
-        var state: [[String: Int]] = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+        let state: [[String: Int]] = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
         if let c = self.cederic {
             let readyExpectation = expectationWithDescription("ready")
             
@@ -200,13 +200,15 @@ class CedericValTests: XCTestCase {
     }
 }
 
+
 class CedericRefTests: XCTestCase {
     
-    var cederic: AgentRef<[[String: Int]]>?
+    //var cederic: AgentRef<NSArray<String>>?
+    var cederic: AgentRef<NSMutableArray>?
     
     override func setUp() {
         super.setUp()
-        var state = [["a": 1], ["b": 2], ["c": 3]]
+        let state = NSMutableArray(array: [["a": 1], ["b": 2], ["c": 3]])
         self.cederic = AgentRef(state)
     }
     
@@ -227,14 +229,14 @@ class CedericRefTests: XCTestCase {
         })
     }
     
-    func testStateTransition(newState: [[String: Int]], modifier: (inout [[String: Int]])->[[String: Int]]) {
+    func testStateTransition(newState: NSArray, modifier: (NSMutableArray)->Void) {
         if let c = self.cederic {
             let readyExpectation = expectationWithDescription("ready")
             
             c.send(modifier)
             
             self.valifyExpect(readyExpectation, bx: { () -> Bool in
-                if c.value == newState {
+                if c.value.isEqualToArray(newState as [AnyObject]) {
                     return true
                 } else {
                     return false
@@ -248,26 +250,23 @@ class CedericRefTests: XCTestCase {
     }
     
     func testAddState() {
-        var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
-        self.testStateTransition(state, modifier: { (v) -> [[String: Int]] in
-            v.append(["d": 4])
-            return v
+        let state = NSArray(array: [["a": 1], ["b": 2], ["c": 3], ["d": 4]])
+        self.testStateTransition(state, modifier: { (v:NSMutableArray) -> Void in
+            v.addObject(["d": 4])
         })
     }
     
     func testRemoveState() {
-        var state = [["a": 1], ["b": 2]]
-        self.testStateTransition(state, modifier: { v in
-            v.removeLast()
-            return v
+        let state = NSArray(array: [["a": 1], ["b": 2]])
+        self.testStateTransition(state, modifier: { (v:NSMutableArray) in
+            v.removeLastObject()
         })
     }
     
     func testChangeState() {
-        var state = [["a": 0], ["b": 2], ["c": 3]]
-        self.testStateTransition(state, modifier: { v in
-            v.replaceRange(0..<1, with: [["a": 0]])
-            return v
+        let state = NSArray(array:[["a": 0], ["b": 2], ["c": 3]])
+        self.testStateTransition(state, modifier: { (v:NSMutableArray) in
+            v.replaceObjectAtIndex(0, withObject: ["a": 0])
         })
     }
     
@@ -275,16 +274,15 @@ class CedericRefTests: XCTestCase {
         if let c = self.cederic {
             let readyExpectation = expectationWithDescription("ready")
             
-            var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
+            let state = NSArray(array:[["a": 1], ["b": 2], ["c": 3], ["d": 4]])
             c.addWatch("w1", watch: { (k, ag, v) -> Void in
                 if v == state {
                     readyExpectation.fulfill()
                 }
             })
             
-            c.send({ v in
-                v.append(["d": 4])
-                return v
+            c.send({ (v: NSMutableArray) in
+                v.addObject(["d": 4])
             })
             
             waitForExpectationsWithTimeout(5, handler: { (e) -> Void in
@@ -297,15 +295,13 @@ class CedericRefTests: XCTestCase {
         if let c = self.cederic {
             var watchTriggered = false
             
-            var state = [["a": 1], ["b": 2], ["c": 3], ["d": 4]]
             c.addWatch("w1", watch: { (k, ag, v) -> Void in
                 watchTriggered = true
             })
             c.removeWatch("w1")
             
-            c.send({ v in
-                v.append(["d": 4])
-                return v
+            c.send({ (v: NSMutableArray) in
+                v.addObject(["d": 4])
             })
             
             dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), { () -> Void in
@@ -315,63 +311,10 @@ class CedericRefTests: XCTestCase {
         }
     }
     
-    /** The following two tests are not directly Cederic related, but instead measure the performance
-        difference of functional Array modification versus non-functional array modification. This is
-        a good guidance as using functional modification on arrays looks much better, however seems to 
-        perform much worse. Consider:
-        Replacement: Functional: 1.153 sec, Mutating: 0.527 sec
-        Appending: Functional: 0.057 sec, Mutating: 0.004 sec
-    */
-    func testArrayFuncReplace() {
-        // Measure Replacement
-        self.measureBlock() {
-            var cx = 0
-            for i in 0..<100000 {
-                let ix = [i, i + 1, i + 2, i + 3, i + 4, i + 5]
-                // we want to measure this
-                let ix2 = [5 + i * 2] + Array(ix[1..<ix.count])
-                
-                let s = ix2.reduce(0, combine: (+))
-                cx += s
-            }
-        }
-        
-    }
     
-    func testArrayFuncAppend() {
-        // Measure Appending
-        self.measureBlock { () -> Void in
-            var arx: [Int] = []
-            for i in 0..<10000 {
-                arx = arx + [i]
-            }
-        }
-    }
-    
-    func testArrayNFuncReplace() {
-        // Measure Replacement
-        self.measureBlock() {
-            var cx = 0
-            for i in 0..<100000 {
-                var ix = [i, i + 1, i + 2, i + 3, i + 4, i + 5]
-                // We want to measure this
-                ix.replaceRange(0..<1, with: [5 + i * 2])
-                let s = ix.reduce(0, combine: (+))
-                cx += s
-            }
-        }
-        
-    }
-    
-    func testArrayNFuncAppend() {
-        // Measure Appending
-        self.measureBlock { () -> Void in
-            var arx:[Int] = []
-            for i in 0..<10000 {
-                arx.append(i)
-            }
-        }
-    }
+}
+
+class CedericPerfTests: XCTestCase {
     
     
     func testPerformanceExample() {
@@ -380,7 +323,7 @@ class CedericRefTests: XCTestCase {
             
             let maxagents = 50000
             var agents: [Agent<Int>] = []
-            for i in 1...maxagents {
+            for _ in 1...maxagents {
                 agents.append(Agent(5, validator: nil))
             }
             
@@ -389,7 +332,7 @@ class CedericRefTests: XCTestCase {
                 while (s > 0) {
                     usleep(200)
                     let pos = Int(arc4random_uniform(UInt32(maxagents)))
-                    agents[pos].send({ (inout v: Int) -> Int in
+                    agents[pos].send({ (v: Int) -> Int in
                         return v + 1
                     })
                     s -= 1
@@ -397,5 +340,4 @@ class CedericRefTests: XCTestCase {
             })
         }
     }
-    
 }

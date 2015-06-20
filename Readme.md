@@ -1,3 +1,4 @@
+
 ## Cederic
 ### Agents for Swift
 #### Agents are Non-Blocking, thread-safe, asynchrounous data structures
@@ -7,9 +8,8 @@
 > Non-blocking, thread-safe, asynchrounous access & modification of any immutable or mutable object
 
 #### Swift 2.0 Status
-- Porting to Swift 2.0 is currently being done on the swift-2.0 branch.
-- Currently crashes with EXC_BAD_ACCESS in debug and normal builds.
-- However, it works fine when the new Xcode7 Address Sanitizer is used
+- The current master branch works for Swift 2.0.
+- If you need Swift 1.2 support, use version [0.0.6](https://github.com/terhechte/Cederic/releases/tag/v0.0.6). 
 
 #### Consider the following code
 8 Threads are replacing NSColor instances in a shared NSMutableArray:
@@ -17,9 +17,8 @@
 ```
 let index = arc4random_uniform(UInt32(self.colorAgent.value.count))
             
-self.colorAgent.send({ (inout a: NSMutableArray) -> NSMutableArray in
+self.colorAgent.send({ (a: NSMutableArray) -> Void in
     a.replaceObjectAtIndex(Int(index), withObject: self.color)
-    return a
     })
 ```
 
@@ -53,7 +52,6 @@ println(ag.value)
 
 #### Status
 - Basic API implemented
-- Lacks Documentation
 - 27% CPU as a Release Build on Retina 13" (2012) with 50000 agents and (around) 1000 data updates per second
 - High memory consumption for many agents (60 mb vs. 4.5 mb for a similar non-asynchronous simple loop over such a structure)
 - 10MB memory growth (from 50mb to 60mb) after ~4500000 data updates over the course of 2 hours (50.000 agents) 
@@ -67,11 +65,18 @@ actions and modiy the state. Through clever GCD machinery, all this is thread sa
 being used from multiple threads.
 
 #### TODO
-- [ ] if actions are generated too fast, operations queue up, and it can take quite long until all operations have been processed
+- [ ] Write more detailed documentation, with examples for Value types, Reference types, and better explanation
+- [x] if actions are generated too fast, operations queue up, and it can take quite long until all operations have been processed
 - [ ] add 'monitor' functionality: add an agent<Dictionary<Agent:Int>> to an agent, and this dictionary will contain the amount of queued up operations for all agents that register this monitor.
 - [ ] think about switching from kqueue to dispatch_semaphore or mach ports
 - [ ] accumulates a lot of memory over time
 - [ ] add jazzy documentation (https://github.com/Realm/jazzy)
+
+##### Version 0.1
+- Swift 2.0 support
+- Improved memory handling, fixed memory errors
+- Changed the signature of the send method for reference and value types
+- Added restriction where reference types have to be of type NSObject, as the main use case for them are typically UI Elements
 
 ##### Version 0.0.6
 - Fixed several threading issues
