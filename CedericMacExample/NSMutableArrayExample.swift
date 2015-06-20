@@ -76,10 +76,9 @@ class MutableCalcOperation: NSOperation {
             
             let index = arc4random_uniform(UInt32(self.colorAgent.value.count))
             
-//            self.colorAgent.send({ (inout a: NSMutableArray) -> NSMutableArray in
-//                a.replaceObjectAtIndex(Int(index), withObject: self.color)
-//                return a
-//            })
+            self.colorAgent.send({ (a: NSMutableArray) -> Void in
+                a.replaceObjectAtIndex(Int(index), withObject: self.color)
+            })
             
             // Wait a short amount of time
             usleep(1000 * arc4random_uniform(15))

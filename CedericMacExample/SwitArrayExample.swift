@@ -29,11 +29,11 @@ class CalcOperation: NSOperation {
             if self.cancelled {
                 return
             }
-            /*
+            
             let randomValue = arc4random_uniform(100)
             
             // Tell the Segmented Control, that we're active
-            self.controlAgent.send({(inout i:NSSegmentedControl) in
+            self.controlAgent.send({(i:NSSegmentedControl) in
                 
                 // Important, in order to stay on the serial queue, we have to
                 // run this code synchronous on the main thread
@@ -42,9 +42,8 @@ class CalcOperation: NSOperation {
                     i.setLabel("OP \(self.index) (\(randomValue))", forSegment: self.index)
                     return
                 })
-                return i
             })
-            */
+            
             
             // Wait a short amount of time
             usleep(1000 * arc4random_uniform(15))
