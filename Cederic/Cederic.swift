@@ -225,7 +225,7 @@ enum AgentSendType {
     - Use validators to valify a state transition (only for AgentValue)
 */
 
-protocol AgentProtocol {
+public protocol AgentProtocol {
     typealias ElementType
     typealias AgentAction
     
@@ -234,9 +234,37 @@ protocol AgentProtocol {
     
     /// Type definition for a validator
     typealias AgentValidator
+    
+    var value: ElementType {get}
+    
+    func map(@noescape transform: (ElementType) -> ElementType) -> ElementType
 }
 
-extension AgentProtocol {
+public extension AgentProtocol {
+/**
+Map over the value of the Agent
+
+    x: Agent<Int> = Agent(5)
+    p = x.map {$0 * 2}
+    p will be 10
+*/
+    func map(@noescape transform: (ElementType) -> ElementType) -> ElementType {
+        return transform(self.value)
+    }
+}
+
+
+public extension AgentProtocol where ElementType : CollectionType, ElementType : SequenceType {
+/**
+Map over the value of collection-type agents
+
+    x: Agent<[Int]> = Agent([1, 2, 3])
+    p = x.map {$0 * 2}
+    p will be [2, 4, 6]
+*/
+    func map<T where Self.ElementType:SequenceType>(@noescape transform: (Self.ElementType.Generator.Element) -> T) -> [T] {
+        return self.value.map(transform)
+    }
 }
 
 public class _AgentBase<T, A> : AgentProtocol {

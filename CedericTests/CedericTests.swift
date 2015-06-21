@@ -200,6 +200,35 @@ class CedericValTests: XCTestCase {
     }
 }
 
+class CedericMapTests: XCTestCase {
+    var cederic: Agent<[Int]> = {
+        let state: [Int] = [1, 2, 3, 4, 5]
+        return Agent(state, validator: nil)
+    }()
+    
+    var cederic2: Agent<Int> = {
+        return Agent(10, validator: nil)
+    }()
+    
+    override func setUp() {
+        super.setUp()
+    }
+    
+    func testMapArrayInt() {
+        let result = self.cederic.map { (a: Int) -> Int in
+            return a * 2
+        }
+        XCTAssertEqual(result, [2, 4, 6, 8, 10])
+    }
+    
+    func testMapInt() {
+        let result = self.cederic2.map { (a: Int) -> Int in
+            return a * 2
+        }
+        XCTAssertEqual(result, 20)
+    }
+}
+
 
 class CedericRefTests: XCTestCase {
     
