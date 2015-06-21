@@ -70,7 +70,26 @@ being used from multiple threads.
 - [ ] add 'monitor' functionality: add an agent<Dictionary<Agent:Int>> to an agent, and this dictionary will contain the amount of queued up operations for all agents that register this monitor.
 - [ ] think about switching from kqueue to dispatch_semaphore or mach ports
 - [ ] accumulates a lot of memory over time
+- [ ] add 'map' to agent, so that a monadic bind can work on it, and so one doesn't have to do value.map
 - [ ] add jazzy documentation (https://github.com/Realm/jazzy)
+
+##### Version 0.1.2
+- Added map operations to cederic:
+Map over a value-based agent
+```
+    x: Agent<Int> = Agent(5)
+    p = x.map {$0 * 2}
+    p will be 10
+```
+
+Map over CollectionType-based agents
+```
+    x: Agent<[Int]> = Agent([1, 2, 3])
+    p = x.map {$0 * 2}
+    p will be [2, 4, 6]
+```
+
+This greatly simplifies reading operations on agents.
 
 ##### Version 0.1
 - Swift 2.0 support
