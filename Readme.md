@@ -65,6 +65,7 @@ actions and modiy the state. Through clever GCD machinery, all this is thread sa
 being used from multiple threads.
 
 #### TODO
+- [ ] Use http://swiftdoc.org/func/isUniquelyReferencedNonObjC instead of p:NSObject to identify reference types vs value types
 - [ ] Write more detailed documentation, with examples for Value types, Reference types, and better explanation
 - [x] if actions are generated too fast, operations queue up, and it can take quite long until all operations have been processed
 - [ ] add 'monitor' functionality: add an agent<Dictionary<Agent:Int>> to an agent, and this dictionary will contain the amount of queued up operations for all agents that register this monitor.
@@ -87,6 +88,13 @@ Map over CollectionType-based agents
     x: Agent<[Int]> = Agent([1, 2, 3])
     p = x.map {$0 * 2}
     p will be [2, 4, 6]
+```
+
+Filter over CollectionType-based agents
+```
+// continuing the above example
+x.filter {$0 >= 2}
+//will yield [2, 3]
 ```
 
 This greatly simplifies reading operations on agents.

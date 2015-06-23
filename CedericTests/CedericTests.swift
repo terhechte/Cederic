@@ -200,7 +200,7 @@ class CedericValTests: XCTestCase {
     }
 }
 
-class CedericMapTests: XCTestCase {
+class CedericFuncTests: XCTestCase {
     var cederic: Agent<[Int]> = {
         let state: [Int] = [1, 2, 3, 4, 5]
         return Agent(state, validator: nil)
@@ -226,6 +226,13 @@ class CedericMapTests: XCTestCase {
             return a * 2
         }
         XCTAssertEqual(result, 20)
+    }
+    
+    func testFilterArrayInt() {
+        let result = self.cederic.filter { (s: Int) -> Bool in
+            return s >= 3
+        }
+        XCTAssertEqual(result, [3, 4, 5])
     }
 }
 

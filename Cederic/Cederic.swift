@@ -265,6 +265,15 @@ Map over the value of collection-type agents
     func map<T where Self.ElementType:SequenceType>(@noescape transform: (Self.ElementType.Generator.Element) -> T) -> [T] {
         return self.value.map(transform)
     }
+    
+/**
+Filter over the value of collection-type agents. Took me quite a while to get the types right
+*/
+    func filter<T where Self.ElementType:SequenceType, T==Self.ElementType.Generator.Element>(includeElement: (Self.ElementType.Generator.Element) -> Bool) -> [Self.ElementType.Generator.Element] {
+//        let s: Self.ElementType = self.value
+        return self.value.filter(includeElement)
+    }
+    
 }
 
 public class _AgentBase<T, A> : AgentProtocol {
