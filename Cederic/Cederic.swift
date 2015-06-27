@@ -273,7 +273,17 @@ Filter over the value of collection-type agents. Took me quite a while to get th
 //        let s: Self.ElementType = self.value
         return self.value.filter(includeElement)
     }
-    
+}
+
+/**
+A simple construct to be able to tag actions with a string.
+In turn, when the action is being executed, any registered watches
+will be notified with the AcionTag in order to better understand how to act.
+This allows to have multiple watches from varying places within the code
+*/
+public enum ActionTag {
+    case None
+    case Tag(String)
 }
 
 public class _AgentBase<T, A> : AgentProtocol {
@@ -292,10 +302,10 @@ public class _AgentBase<T, A> : AgentProtocol {
     private var state: ElementType
     
     /// Outstanding actions to be applied to the agent's state
-    private var actions: [(AgentSendType, AgentAction)]
+    private var actions: [(AgentSendType, AgentAction, ActionTag)]
     
     /// Any watches that the user may have defined
-    private var watches: [String: AgentWatch]
+    private var watches: [String: (AgentWatch, ActionTag)]
     
     /// The validator, if the user assigned one
     private var validator: AgentValidator?
@@ -332,7 +342,7 @@ public class _AgentBase<T, A> : AgentProtocol {
         queueManager.remove(self.opidx)
     }
     
-    private func calculate(state: T, fn: AgentAction) {
+    private func calculate(state: T, fn: AgentAction, tag: ActionTag) {
         fatalError("Cannot use the AgentBase")
     }
     
@@ -344,7 +354,7 @@ public class _AgentBase<T, A> : AgentProtocol {
     private func process() {
         
         // create a copy
-        var actionsCopy: [(AgentSendType, AgentAction)]? = nil
+        var actionsCopy: [(AgentSendType, AgentAction, ActionTag)]? = nil
         
         dispatch_sync(queueManager.agentBlockQueue, { () -> Void in
             actionsCopy = self.actions
@@ -356,7 +366,7 @@ public class _AgentBase<T, A> : AgentProtocol {
             }
         })
         
-        func processOnQueue(q: dispatch_queue_t, f: AgentAction) {
+        func processOnQueue(q: dispatch_queue_t, f: AgentAction, tag: ActionTag) {
             self.processOnQueueCount += 1
             
             dispatch_group_enter(self.dispatchGroup)
@@ -365,7 +375,7 @@ public class _AgentBase<T, A> : AgentProtocol {
                     
                     // Don't perform any further processing if the operations are cancelled
                     if !self.isCancelled {
-                        self.calculate(self.state, fn: f)
+                        self.calculate(self.state, fn: f, tag: tag)
                         self.processOnQueueCount -= 1
                     }
                     
@@ -376,14 +386,14 @@ public class _AgentBase<T, A> : AgentProtocol {
         if let act = actionsCopy  {
             for fn in act {
                 switch fn {
-                case (.Pooled, let f):
-                    processOnQueue(self.poolQueue, f: f)
-                case (.Solo, let f):
+                case (.Pooled, let f, let tag):
+                    processOnQueue(self.poolQueue, f: f, tag: tag)
+                case (.Solo, let f, let tag):
                     // Create and destroy a queue just for this
                     let uuid = NSUUID().UUIDString
                     let ourQueue = dispatch_queue_create(uuid, nil)
                     dispatch_group_wait(self.dispatchGroup, DISPATCH_TIME_FOREVER)
-                    processOnQueue(ourQueue, f: f)
+                    processOnQueue(ourQueue, f: f, tag: tag)
                 }
             }
         }
@@ -402,8 +412,12 @@ public class _AgentBase<T, A> : AgentProtocol {
     
     Your code will be executed on one of the pooled dispatch queues.
     */
+    public func send(fn: A, tag: ActionTag) {
+        self.sendToManager(fn, tp: AgentSendType.Pooled, tag: tag)
+    }
+    
     public func send(fn: A) {
-        self.sendToManager(fn, tp: AgentSendType.Pooled)
+        self.sendToManager(fn, tp: AgentSendType.Pooled, tag: ActionTag.None)
     }
     
 
@@ -414,8 +428,13 @@ public class _AgentBase<T, A> : AgentProtocol {
     
     Your code will be executed on a serial dispatch queue specifically created for executing your code.
     */
+    
+    public func sendOff(fn: A, tag: ActionTag) {
+        self.sendToManager(fn, tp: AgentSendType.Solo, tag: tag)
+    }
+    
     public func sendOff(fn: A) {
-        self.sendToManager(fn, tp: AgentSendType.Solo)
+        self.sendToManager(fn, tp: AgentSendType.Solo, tag: ActionTag.None)
     }
     
     /**
@@ -476,7 +495,18 @@ public class _AgentBase<T, A> : AgentProtocol {
     */
     public func addWatch(key: String, watch: AgentWatch) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
-            self.watches[key] = watch
+            self.watches[key] = (watch, ActionTag.None)
+        })
+    }
+    
+    /**
+    Similar to addWatch(key: watch) with one additional parameter:
+    - parameter tag: If .Tag("Something") then this watch will only be fired if
+    the send function also included this tag
+    */
+    public func addWatch(key: String, tag: ActionTag, watch: AgentWatch) {
+        dispatch_async(queueManager.agentBlockQueue, { () -> Void in
+            self.watches[key] = (watch, tag)
         })
     }
     
@@ -491,11 +521,34 @@ public class _AgentBase<T, A> : AgentProtocol {
         })
     }
     
-    private func sendToManager(fn: AgentAction, tp: AgentSendType) {
+    private func sendToManager(fn: AgentAction, tp: AgentSendType, tag: ActionTag) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
-            self.actions.append((tp, fn))
+            self.actions.append((tp, fn, tag))
             postToQueue(queueManager.kQueue, value: &self.opidx)
         })
+    }
+    
+    /**
+    Notify the watches with a new state
+    */
+    func notifyWatches(sx: T, tag: ActionTag) {
+        // Notify the watches
+        for (key, (watch, watchTag)) in self.watches {
+            switch (tag, watchTag) {
+                // if the action is not tagged and the watch is not tagged, we send it out
+            case (.None, .None):
+                watch(key, self, sx)
+                // if the action is tagged but the watch is not tagged, we send it out too
+            case (.Tag, .None):
+                watch(key, self, sx)
+                // if the action is tagged and the watch is tagged, we only send it if it is the same
+            case (.Tag(let x1), .Tag(let x2)) where x1 == x2:
+                watch(key, self, sx)
+                // otherwise, we'll ignore it
+            default: ()
+            }
+        }
+        
     }
 }
 
@@ -508,7 +561,7 @@ final public class Agent<T> : _AgentBase<T,(T)->T>  {
         super.init(initialState, validator: validator)
     }
     
-    override private func calculate(state: T, fn: AgentAction) {
+    override private func calculate(state: T, fn: AgentAction, tag: ActionTag) {
         // Calculate the new state
         let sx = fn(state)
         
@@ -520,10 +573,7 @@ final public class Agent<T> : _AgentBase<T,(T)->T>  {
             }
         }
         
-        // Notify the watches
-        for (key, watch) in self.watches {
-            watch(key, self, sx)
-        }
+        self.notifyWatches(sx, tag: tag)
         
         // Apply the state
         self.state = sx
@@ -558,13 +608,11 @@ final public class AgentRef<T where T:NSObject> : _AgentBase<T,(T)->Void>  {
         super.init(initialState, validator: nil)
     }
 
-    override private func calculate(state: T, fn: AgentAction) {
-            fn(self.state)
+    override private func calculate(state: T, fn: AgentAction, tag: ActionTag) {
+        fn(self.state)
         
-            // Notify the watches
-            for (key, watch) in self.watches {
-                watch(key, self, self.state)
-            }
+        // Notify the watches
+        self.notifyWatches(self.state, tag: tag)
     }
 }
 
