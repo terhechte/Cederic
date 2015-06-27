@@ -270,7 +270,6 @@ Map over the value of collection-type agents
 Filter over the value of collection-type agents. Took me quite a while to get the types right
 */
     func filter<T where Self.ElementType:SequenceType, T==Self.ElementType.Generator.Element>(includeElement: (Self.ElementType.Generator.Element) -> Bool) -> [Self.ElementType.Generator.Element] {
-//        let s: Self.ElementType = self.value
         return self.value.filter(includeElement)
     }
 }
