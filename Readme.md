@@ -7,6 +7,9 @@
 
 > Non-blocking, thread-safe, asynchrounous access & modification of any immutable or mutable object
 
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+
+
 #### Swift 2.0 Status
 - The current master branch works for Swift 2.0.
 - If you need Swift 1.2 support, use version [0.0.6](https://github.com/terhechte/Cederic/releases/tag/v0.0.6). 
@@ -65,13 +68,13 @@ actions and modiy the state. Through clever GCD machinery, all this is thread sa
 being used from multiple threads.
 
 #### TODO
-- [ ] Use http://swiftdoc.org/func/isUniquelyReferencedNonObjC instead of p:NSObject to identify reference types vs value types
+- [x] add keypath watches, so that the watch only fires if a keypath is changed.. aw how to implement that... Implemented 'tags' instead, much easier for now (still experimental)
 - [ ] Write more detailed documentation, with examples for Value types, Reference types, and better explanation
 - [x] if actions are generated too fast, operations queue up, and it can take quite long until all operations have been processed
 - [ ] add 'monitor' functionality: add an agent<Dictionary<Agent:Int>> to an agent, and this dictionary will contain the amount of queued up operations for all agents that register this monitor.
 - [ ] think about switching from kqueue to dispatch_semaphore or mach ports
 - [ ] accumulates a lot of memory over time
-- [ ] add 'map' to agent, so that a monadic bind can work on it, and so one doesn't have to do value.map
+- [x] add 'map' to agent, so that a monadic bind can work on it, and so one doesn't have to do value.map
 - [ ] add jazzy documentation (https://github.com/Realm/jazzy)
 
 ##### Version 0.1.2
