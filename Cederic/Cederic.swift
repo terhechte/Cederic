@@ -12,13 +12,35 @@ import Dispatch
 let kAmountOfPooledQueues = 4
 let kKqueueUserIdentifier = UInt(0x6c0176cf) // a random number
 
+enum kQueueError: ErrorType {
+    case NoQueueError
+    case PostError(message: String)
+    case ReadError(message: String)
+}
+
 /**
     Create a new kqueue Object
     - Returns: The file descriptor of the kernel queue
 */
-private func setupQueue() -> Int32 {
+private func setupQueue() throws -> Int32 {
     let k = kqueue()
+    if k == -1 {
+        throw kQueueError.NoQueueError
+    }
     return k
+}
+
+/** 
+    Return a error String from the C error in a queue
+*/
+func cErrorFromCode(errorNumber: Int32) -> String {
+    let error = strerror(errorNumber)
+    let errorCString = unsafeBitCast(error, UnsafePointer<Int8>.self)
+    if let s = String.fromCString(errorCString) {
+        return s
+    } else {
+        return ""
+    }
 }
 
 /** 
@@ -28,11 +50,16 @@ private func setupQueue() -> Int32 {
     - parameter value: A pointer to a payload you wish to post to the kqueue
     - returns: A number > 0 for successful posting, and -1 if there is an error
 */
-private func postToQueue(queue: Int32, value: UnsafeMutablePointer<Void>) -> Int32 {
+private func postToQueue(queue: Int32, value: UnsafeMutablePointer<Void>) throws -> Int32 {
     let flags = EV_ENABLE
     let fflags = NOTE_TRIGGER
     var kev: kevent = kevent(ident: UInt(kKqueueUserIdentifier), filter: Int16(EVFILT_USER), flags: UInt16(flags), fflags: UInt32(fflags), data: Int(0), udata: value)
     let newEvent = kevent(queue, &kev, 1, nil, 0, nil)
+    
+    if newEvent == -1 {
+        throw kQueueError.ReadError(message: cErrorFromCode(errno))
+    }
+    
     return newEvent
 }
 
@@ -44,12 +71,16 @@ private func postToQueue(queue: Int32, value: UnsafeMutablePointer<Void>) -> Int
 
     *Warning*: Always test the pointer against nil before unpacking the value pointed to with .memory
 */
-private func readFromQueue(queue: Int32) -> UnsafeMutablePointer<Void> {
+private func readFromQueue(queue: Int32) throws -> UnsafeMutablePointer<Void> {
     var evlist = UnsafeMutablePointer<kevent>.alloc(1)
     let flags = EV_ADD | EV_CLEAR | EV_ENABLE
     var kev: kevent = kevent(ident: UInt(kKqueueUserIdentifier), filter: Int16(EVFILT_USER), flags: UInt16(flags), fflags: UInt32(0), data: Int(0), udata: nil)
     
-    kevent(queue, &kev, 1, evlist, 1, nil)
+    let newEventCount = kevent(queue, &kev, 1, evlist, 1, nil)
+    
+    if newEventCount == -1 {
+        throw kQueueError.ReadError(message: cErrorFromCode(errno))
+    }
     
     let m = evlist[0].udata
     
@@ -100,7 +131,11 @@ private class AgentQueueManager {
     
     init() {
         // Register a Kjue Queue that filters user events
-        self.kQueue = kqueue()
+        do {
+            self.kQueue = try setupQueue()
+        } catch _ {
+            fatalError("Agent could not set up a kqueue")
+        }
         self.perform()
     }
     
@@ -145,23 +180,27 @@ private class AgentQueueManager {
     Runs on the system background queue, the processing happens on the agentProcessQueue, and from there on the pool queue
     */
     func perform() {
-        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
         dispatch_async(self.agentProcessConcurrentQueue, { () -> Void in
             while (true) {
-                let data = readFromQueue(self.kQueue)
-                if data != nil {
-                    let dataString = UnsafeMutablePointer<String>(data)
-                    let sx = dataString.memory
-                    
-                    // Operations are processed on a concurrent queue, so that
-                    // the individual agents change their state as fast as possible.
-                    // the actual operation is processed on one of the agent pool queues
-                    // anyway, so this will not block the concurrent queue too long
-                    dispatch_async(self.agentProcessQueue, { () -> Void in
-                        if let op = self.operations[sx] {
-                            op()
-                        }
-                    })
+                do {
+                    let data = try readFromQueue(self.kQueue)
+                    if data != nil {
+                        let dataString = UnsafeMutablePointer<String>(data)
+                        let sx = dataString.memory
+                        
+                        // Operations are processed on a concurrent queue, so that
+                        // the individual agents change their state as fast as possible.
+                        // the actual operation is processed on one of the agent pool queues
+                        // anyway, so this will not block the concurrent queue too long
+                        dispatch_async(self.agentProcessQueue, { () -> Void in
+                            if let op = self.operations[sx] {
+                                op()
+                            }
+                        })
+                    }
+                } catch _ {
+                    // FIXME: Handle the error
+                    continue
                 }
             }
         })
@@ -523,7 +562,11 @@ public class _AgentBase<T, A> : AgentProtocol {
     private func sendToManager(fn: AgentAction, tp: AgentSendType, tag: ActionTag) {
         dispatch_async(queueManager.agentBlockQueue, { () -> Void in
             self.actions.append((tp, fn, tag))
-            postToQueue(queueManager.kQueue, value: &self.opidx)
+            do {
+                try postToQueue(queueManager.kQueue, value: &self.opidx)
+            } catch _ {
+                // FIXME: Handle the error in a sane way
+            }
         })
     }
     

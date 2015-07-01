@@ -76,6 +76,7 @@ being used from multiple threads.
 - [ ] accumulates a lot of memory over time
 - [x] add 'map' to agent, so that a monadic bind can work on it, and so one doesn't have to do value.map
 - [ ] add jazzy documentation (https://github.com/Realm/jazzy)
+- [ ] Find a sane way to handle errors for the kqueue mechanisms, i.e. how to act, notify the user, what to do?
 
 ##### Version 0.1.2
 - Added map operations to cederic:
