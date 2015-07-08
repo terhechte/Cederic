@@ -204,9 +204,9 @@
 			productReference = 4D5A3A1E1B14DF660006A7B3 /* CedericMacExample.app */;
 			productType = "com.apple.product-type.application";
 		};
-		4D5A3A6C1B15B05F0006A7B3 /* Cederic */ = {
+		4D5A3A6C1B15B05F0006A7B3 /* Cederic-OSX */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4D5A3A861B15B05F0006A7B3 /* Build configuration list for PBXNativeTarget "Cederic" */;
+			buildConfigurationList = 4D5A3A861B15B05F0006A7B3 /* Build configuration list for PBXNativeTarget "Cederic-OSX" */;
 			buildPhases = (
 				4D5A3A681B15B05F0006A7B3 /* Sources */,
 				4D5A3A691B15B05F0006A7B3 /* Frameworks */,
@@ -217,7 +217,7 @@
 			);
 			dependencies = (
 			);
-			name = Cederic;
+			name = "Cederic-OSX";
 			productName = Cederic;
 			productReference = 4D5A3A6D1B15B05F0006A7B3 /* Cederic.framework */;
 			productType = "com.apple.product-type.framework";
@@ -275,7 +275,7 @@
 			projectRoot = "";
 			targets = (
 				4D5A3A1D1B14DF660006A7B3 /* CedericMacExample */,
-				4D5A3A6C1B15B05F0006A7B3 /* Cederic */,
+				4D5A3A6C1B15B05F0006A7B3 /* Cederic-OSX */,
 				4D5A3AA41B15B5B70006A7B3 /* CedericTests */,
 			);
 		};
@@ -339,12 +339,12 @@
 /* Begin PBXTargetDependency section */
 		4D5A3A831B15B05F0006A7B3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4D5A3A6C1B15B05F0006A7B3 /* Cederic */;
+			target = 4D5A3A6C1B15B05F0006A7B3 /* Cederic-OSX */;
 			targetProxy = 4D5A3A821B15B05F0006A7B3 /* PBXContainerItemProxy */;
 		};
 		4D5A3AAD1B15B5B70006A7B3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4D5A3A6C1B15B05F0006A7B3 /* Cederic */;
+			target = 4D5A3A6C1B15B05F0006A7B3 /* Cederic-OSX */;
 			targetProxy = 4D5A3AAC1B15B5B70006A7B3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -373,7 +373,7 @@
 				);
 				INFOPLIST_FILE = CedericMacExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "BT.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.terhechte.CedericMacExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -386,7 +386,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = CedericMacExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "BT.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.terhechte.CedericMacExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -410,8 +410,8 @@
 				INFOPLIST_FILE = Cederic/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "BT.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.terhechte.Cederic;
+				PRODUCT_NAME = Cederic;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -434,8 +434,8 @@
 				INFOPLIST_FILE = Cederic/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "BT.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.terhechte.Cederic;
+				PRODUCT_NAME = Cederic;
 				SKIP_INSTALL = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -567,7 +567,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4D5A3A861B15B05F0006A7B3 /* Build configuration list for PBXNativeTarget "Cederic" */ = {
+		4D5A3A861B15B05F0006A7B3 /* Build configuration list for PBXNativeTarget "Cederic-OSX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4D5A3A871B15B05F0006A7B3 /* Debug */,

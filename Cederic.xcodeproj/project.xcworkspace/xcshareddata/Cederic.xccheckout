@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>1B7DEFC7-55C6-4450-8E8C-15CE002594F6</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Cederic</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>4B3BF8E4AB5146370345B1257B19C739D7C7FE9A</key>
+		<string>https://github.com/terhechte/Cederic.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Cederic.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>4B3BF8E4AB5146370345B1257B19C739D7C7FE9A</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/terhechte/Cederic.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>4B3BF8E4AB5146370345B1257B19C739D7C7FE9A</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>4B3BF8E4AB5146370345B1257B19C739D7C7FE9A</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Cederic</string>
+		</dict>
+	</array>
+</dict>
+</plist>
