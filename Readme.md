@@ -11,6 +11,7 @@
 
 
 #### Swift 2.0 Status
+- Currently not tested yet with Swift 2.0 b4. 
 - The current master branch works for Swift 2.0.
 - If you need Swift 1.2 support, use version [0.0.6](https://github.com/terhechte/Cederic/releases/tag/v0.0.6). 
 
